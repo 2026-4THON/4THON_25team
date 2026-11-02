@@ -1,8 +1,8 @@
 ---
-name: Refactor - 코드 개선(기능 변경 X)
+name: "♻️ Refactor - 코드 개선(기능 변경 X)"
 about: Describe this issue template's purpose here.
 title: ''
-labels: ''
+labels: Refactor
 assignees: ''
 
 ---

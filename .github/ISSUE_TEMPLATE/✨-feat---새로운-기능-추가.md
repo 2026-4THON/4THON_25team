@@ -1,5 +1,5 @@
 ---
-name: Feat - 새로운 기능 추가
+name: "✨ Feat - 새로운 기능 추가"
 about: Describe this issue template's purpose here.
 title: ''
 labels: Feat

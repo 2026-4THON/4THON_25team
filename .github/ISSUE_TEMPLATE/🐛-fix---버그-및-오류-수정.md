@@ -1,5 +1,5 @@
 ---
-name: Fix - 버그 및 오류 수정
+name: "\U0001F41B Fix - 버그 및 오류 수정"
 about: Describe this issue template's purpose here.
 title: ''
 labels: bug
