@@ -1,16 +1,16 @@
-import { Outlet } from 'react-router-dom'
-
+import { Outlet } from "react-router-dom";
 import Nav from "../nav/nav.jsx";
-
-import './Layout.scss'
+import "./Layout.scss";
 
 const Layout = () => {
   return (
     <div className="layout">
-      <Outlet />
+      <main className="layout__screen">
+        <Outlet />
+      </main>
       <Nav />
     </div>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;
