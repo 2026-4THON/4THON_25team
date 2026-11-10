@@ -3,9 +3,7 @@ import "./my.scss";
 //  임시 데이터
 const MOCK = {
   userId: "아이디",
-  // 취향 분석 전이면 null, 분석 후면 분석 문구 문자열 (줄바꿈은 \n)
   analysis: null,
-  // analysis: "비극적인 서사와 깊은 감정선으로\n여운을 남기는 작품을 선호해요",
   tickets: [
     { label: "뮤지컬", count: 5 },
     { label: "연극", count: 2 },

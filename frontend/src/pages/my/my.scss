@@ -7,6 +7,8 @@ $header-bottom: #5b9bd5;
 $line: #8db9ea;
 $line-soft: #b9d3f0;
 
+$font : Paperlogy ;
+
 .my {
   min-height: 100%;
   padding-bottom: 24px;
@@ -56,9 +58,10 @@ $line-soft: #b9d3f0;
 
   &__id {
     margin: 0;
-    font-size: 28px;
+    font-size: 20px;
     font-weight: 600;
     color: $blue;
+    font-family: $font;
   }
 
   &__message {
