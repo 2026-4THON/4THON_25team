@@ -1,14 +1,13 @@
-import { Routes } from "react-router-dom";
-
-
-
+import { Routes, Route } from "react-router-dom";
+import Layout from "../src/components/layout/Layout.jsx"; 
 
 function App() {
   return (
-    <div className="app">
-      <Routes>
-      </Routes>
-    </div>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<div>홈</div>} />
+      </Route>
+    </Routes>
   );
 }
 
