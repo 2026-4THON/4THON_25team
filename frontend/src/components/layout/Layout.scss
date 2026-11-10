@@ -1,16 +1,19 @@
 .layout {
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: 390px;
   height: 844px;
   margin: 0 auto;
   overflow: hidden;
   background: #fff;
+}
 
-  &__screen {
-    height: 100%;
-    overflow-y: auto;
-    padding-bottom: 100px; 
-  }
+.layout > main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 100px; 
 }
 
 .layout .bottom-nav {
