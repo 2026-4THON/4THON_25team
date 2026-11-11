@@ -10,11 +10,13 @@ $line-soft: #b9d3f0;
 $font : Paperlogy ;
 
 .my {
-  min-height: 100%;
   padding-bottom: 24px;
   background: $bg;
   font-family: "Paperlogy", sans-serif;
   color: $text;
+  min-height: calc(100% + 100px); 
+  margin-bottom: -100px;        
+  padding-bottom: 124px;         
   
 
   &__header {
