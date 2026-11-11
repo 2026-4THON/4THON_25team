@@ -1,0 +1,94 @@
+$blue: #0078d4;
+$header-blue: #509cd8;
+$bg: #edf4fb;
+$gray: #656565;
+$font: "Paperlogy", sans-serif;
+
+.record {
+  min-height: calc(100% + 100px);
+  margin-bottom: -100px;
+  padding-bottom: 120px;
+  background: $bg;
+  font-family: $font;
+
+  &__header {
+    position: relative;
+    height: 124px;
+    background: $header-blue;
+  }
+
+  &__title {
+    position: absolute;
+    left: 21px;
+    top: 72px;
+    margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: normal;
+    color: #fff;
+  }
+
+  &__add {
+    position: absolute;
+    right: 21px;
+    top: 68px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 16px;
+    border: 1px solid #4d4d4d;
+    border-radius: 100px;
+    background: #fff;
+    font-family: $font;
+    font-size: 15px;
+    font-weight: 500;
+    color: $blue;
+    cursor: pointer;
+  }
+
+  &__bar {
+    height: 5px;
+    background: $blue;
+  }
+
+  &__sort {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    height: 15px;
+    margin-top: 17px;
+    padding: 0 22px;
+  }
+
+  &__sort-btn {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: $font;
+    font-size: 13px;
+    font-weight: 400;
+    color: $gray;
+    cursor: pointer;
+
+    &--active {
+      color: $blue;
+    }
+  }
+
+  &__sort-divider {
+    width: 1px;
+    height: 11px;
+    background: #c4c4c4;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin: 0;
+    padding: 8px 0;
+    list-style: none;
+  }
+}
