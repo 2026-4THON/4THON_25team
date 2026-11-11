@@ -5,6 +5,8 @@ import Map from "./pages/map/Map.jsx";
 import Record from "./pages/record/Record.jsx";
 import RecordDetail from "./pages/record/RecordDetail.jsx";
 import Analysis from "./pages/analysis/Analysis.jsx";
+import Detail from "./pages/home/detail.jsx";
+
 
 function App() {
   return (
@@ -15,6 +17,7 @@ function App() {
         <Route path="/map" element={<Map />} />
         <Route path="/record" element={<Record />} />
         <Route path="/analysis" element={<Analysis />} />
+        <Route path="/detail/:id" element={<Detail />} />
       </Route>
       <Route path="/record/:id" element={<RecordDetail />} />
     </Routes>
