@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "../src/components/layout/Layout.jsx"; 
 import Map from "./pages/map/Map.jsx";
 import Record from "./pages/record/Record.jsx";
+import RecordDetail from "./pages/record/RecordDetail.jsx";
 import Analysis from "./pages/analysis/Analysis.jsx";
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Route path="/record" element={<Record />} />
         <Route path="/analysis" element={<Analysis />} />
       </Route>
+      <Route path="/record/:id" element={<RecordDetail />} />
     </Routes>
   );
 }
