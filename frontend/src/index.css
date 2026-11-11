@@ -1,3 +1,27 @@
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./assets/fonts/Paperlogy-4Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./assets/fonts/Paperlogy-5Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Paperlogy";
+  src: url("./assets/fonts/Paperlogy-6SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -9,3 +33,13 @@ body,
   height: 100%;
 }
 
+body {
+  font-family: "Paperlogy", sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
