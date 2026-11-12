@@ -1,0 +1,249 @@
+$blue: #0078d4;
+$header-blue: #509cd8;
+$label-gray: #4d4d4d;
+$gray-light: #aeaeae;
+$chip-border: #a6cff0;
+$result-divider: #e3e3e3;
+$font: "Paperlogy", sans-serif;
+
+.step-select {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 26px 0;
+  font-family: $font;
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 338px;
+  }
+
+  &__label {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: normal;
+    color: $label-gray;
+  }
+
+  &__search {
+    position: relative;
+    box-sizing: border-box;
+    width: 338px;
+    border: 1px solid $blue;
+    border-radius: 5px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  &__search-row {
+    position: relative;
+    height: 40px;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 300px;
+    top: 5px;
+  }
+
+  &__input {
+    box-sizing: border-box;
+    width: 290px;
+    height: 100%;
+    padding: 0 0 0 10px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-family: $font;
+    font-size: 16px;
+    font-weight: 500;
+    color: #000;
+
+    &::placeholder {
+      font-weight: 400;
+      color: $gray-light;
+    }
+  }
+
+  &__selected {
+    position: absolute;
+    left: 10px;
+    top: 9px;
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  &__results {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      box-sizing: border-box;
+      height: 41.5px;
+      border-top: 1px solid $result-divider;
+    }
+  }
+
+  &__result {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    width: 100%;
+    height: 100%;
+    padding: 9px 0 0 10px;
+    border: 0;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  &__genre {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 22px;
+    padding: 3.3px 11px;
+    border: 1.1px solid $chip-border;
+    border-radius: 110px;
+    background: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: normal;
+    color: $blue;
+    white-space: nowrap;
+  }
+
+  &__show-title {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  &__calendar {
+    box-sizing: border-box;
+    width: 338px;
+    padding-bottom: 7px;
+    border: 1px solid $blue;
+    border-radius: 5px;
+    background: #fff;
+  }
+
+  &__calendar-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 92px;
+    height: 18px;
+    margin-top: 16px;
+  }
+
+  &__arrow {
+    display: flex;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  &__month {
+    display: flex;
+    gap: 7px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  &__weekdays,
+  &__days {
+    display: grid;
+    grid-template-columns: repeat(7, 41.14px);
+    margin-left: 21px;
+    text-align: center;
+  }
+
+  &__weekdays {
+    margin-top: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+  }
+
+  &__days {
+    margin-top: 7px;
+  }
+
+  &__day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 37px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: $font;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+    }
+
+    &--show {
+      color: $blue;
+    }
+
+    &--none {
+      color: #000;
+    }
+
+    &--selected span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 100px;
+      background: $header-blue;
+      color: #fff;
+    }
+  }
+
+  &__times {
+    display: flex;
+    gap: 10px;
+  }
+
+  &__time {
+    box-sizing: border-box;
+    width: 99px;
+    height: 42px;
+    border: 1px solid $blue;
+    border-radius: 5px;
+    background: #fff;
+    font-family: $font;
+    font-size: 16px;
+    font-weight: 500;
+    color: #000;
+    cursor: pointer;
+
+    &--selected {
+      background: $chip-border;
+    }
+  }
+}

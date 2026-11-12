@@ -1,0 +1,108 @@
+$blue: #0078d4;
+$sub-blue: #509cd8;
+$chip-border: #a6cff0;
+$bg: #edf4fb;
+$font: "Paperlogy", sans-serif;
+
+.cast-sheet {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  width: 390px;
+  height: 100%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  font-family: $font;
+
+  &__panel {
+    position: relative;
+    width: 390px;
+    height: 320px;
+    border-radius: 20px 20px 0 0;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  &__content {
+    position: absolute;
+    left: 26px;
+    top: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 338px;
+  }
+
+  &__title {
+    margin: 0;
+    width: 100%;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: normal;
+    text-align: center;
+    color: #4d4d4d;
+  }
+
+  &__divider {
+    width: 338px;
+    height: 1.5px;
+    background: $chip-border;
+  }
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 5px;
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+
+  &__chip {
+    box-sizing: border-box;
+    width: 63px;
+    height: 30px;
+    padding: 0;
+    border: 1.5px solid transparent;
+    border-radius: 50px;
+    background: $bg;
+    font-family: $font;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &--selected {
+      border-color: $blue;
+    }
+  }
+
+  &__done {
+    position: absolute;
+    left: 26px;
+    top: 223px;
+    box-sizing: border-box;
+    width: 338px;
+    height: 34px;
+    border: 1.5px solid $chip-border;
+    border-radius: 5px;
+    background: #fff;
+    font-family: $font;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: normal;
+    color: $sub-blue;
+    cursor: pointer;
+
+    &:hover {
+      background: $chip-border;
+      color: $blue;
+    }
+  }
+}

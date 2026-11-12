@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { RECORD_DETAIL } from "./recordMock.js";
+import { useNavigate, useParams } from "react-router-dom";
+import { getDetail, deleteRecord } from "./recordStore.js";
 import iconBack from "../../assets/record/icon-back.svg";
 import iconEdit from "../../assets/record/icon-edit.svg";
 import iconDelete from "../../assets/record/icon-delete.svg";
@@ -18,15 +18,16 @@ const PERFORATION_COUNT = 7;
 
 const RecordDetail = () => {
   const navigate = useNavigate();
-  const data = RECORD_DETAIL;
+  const { id } = useParams();
+  const data = getDetail(Number(id));
   const [tab, setTab] = useState("info");
   const [selectedActor, setSelectedActor] = useState(data.actors[0]);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handleDelete = () => {
-    // 백엔드 연동 전까지는 목록으로만 이동한다.
+    deleteRecord(Number(id));
     setIsDeleteOpen(false);
-    navigate("/record");
+    navigate("/record", { replace: true });
   };
 
   return (
@@ -41,7 +42,11 @@ const RecordDetail = () => {
         </button>
         <h1 className="record-detail__title">나의기록</h1>
         <div className="record-detail__actions">
-          <button type="button" className="record-detail__action">
+          <button
+            type="button"
+            className="record-detail__action"
+            onClick={() => navigate(`/record/${id}/edit`)}
+          >
             <img src={iconEdit} alt="수정" />
           </button>
           <button

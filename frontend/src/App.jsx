@@ -3,6 +3,8 @@ import Layout from "../src/components/layout/Layout.jsx";
 import Map from "./pages/map/Map.jsx";
 import Record from "./pages/record/Record.jsx";
 import RecordDetail from "./pages/record/RecordDetail.jsx";
+import TicketRegister from "./pages/record/register/TicketRegister.jsx";
+import RegisterComplete from "./pages/record/register/RegisterComplete.jsx";
 import Analysis from "./pages/analysis/Analysis.jsx";
 
 function App() {
@@ -14,6 +16,9 @@ function App() {
         <Route path="/record" element={<Record />} />
         <Route path="/analysis" element={<Analysis />} />
       </Route>
+      <Route path="/record/new" element={<TicketRegister />} />
+      <Route path="/record/new/complete" element={<RegisterComplete />} />
+      <Route path="/record/:id/edit" element={<TicketRegister mode="edit" />} />
       <Route path="/record/:id" element={<RecordDetail />} />
     </Routes>
   );
