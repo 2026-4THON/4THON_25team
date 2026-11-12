@@ -4,6 +4,8 @@ import My from "./pages/my/my.jsx";
 import Map from "./pages/map/Map.jsx";
 import Record from "./pages/record/Record.jsx";
 import RecordDetail from "./pages/record/RecordDetail.jsx";
+import TicketRegister from "./pages/record/register/TicketRegister.jsx";
+import RegisterComplete from "./pages/record/register/RegisterComplete.jsx";
 import Analysis from "./pages/analysis/Analysis.jsx";
 import Home from "./pages/home/home.jsx";
 import Detail from "./pages/home/detail.jsx";
