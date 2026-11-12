@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import "./detail.scss";
+import PairTab from "./pairTab.jsx";
 
 import backIcon from "../../assets/home/back.svg";
 import starIcon from "../../assets/home/star.svg";
@@ -48,6 +49,7 @@ function Detail() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("info");
   const [open, setOpen] = useState(false); 
+  const { id } = useParams();
 
   const d = MOCK;
 
@@ -177,7 +179,7 @@ function Detail() {
                     key={`${name}-${i}`}
                     type="button"
                     className="detail__actor"
-                    onClick={() => {}}
+                    onClick={() => navigate(`/detail/${id}/actor/${encodeURIComponent(name)}`)}
                   >
                     {name}
                   </button>
@@ -207,8 +209,8 @@ function Detail() {
             </section>
           </>
         )}
-
-        {tab !== "info" && <p className="detail__empty">준비 중이에요</p>}
+            {tab === "pair" && <PairTab />}
+            {tab === "review" && <p className="detail__empty">준비 중이에요</p>}
       </div>
     </div>
   );
