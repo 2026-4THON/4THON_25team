@@ -22,7 +22,7 @@ export const loadKakaoMap = () => {
     }
 
     const script = document.createElement("script");
-    script.src = `${SDK_URL}?appkey=${encodeURIComponent(key)}&autoload=false`;
+    script.src = `${SDK_URL}?appkey=${encodeURIComponent(key)}&autoload=false&libraries=services`;
     script.async = true;
     script.onload = () => {
       window.kakao.maps.load(() => resolve(window.kakao));
