@@ -29,6 +29,7 @@ const POPULAR = Array.from({ length: 9 }, (_, i) => ({
 const GENRES = ["전체", "뮤지컬", "연극", "기타"];
 const STATUS_CLASS = { 진행중: "live", 예정: "soon", 완료: "done" };
 
+
 // 장르 + 토글(진행중 / 통합: 진행작+예정작+과거작) 필터
 const filterItems = (items, genre, mode) =>
   items.filter(

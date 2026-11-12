@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import "./detail.scss";
 import PairTab from "./pairTab.jsx";
+import ReviewTab from "./reviewTab.jsx";
 
 import backIcon from "../../assets/home/back.svg";
 import starIcon from "../../assets/home/star.svg";
@@ -210,7 +211,7 @@ function Detail() {
           </>
         )}
             {tab === "pair" && <PairTab />}
-            {tab === "review" && <p className="detail__empty">준비 중이에요</p>}
+            {tab === "review" && <ReviewTab />}
       </div>
     </div>
   );

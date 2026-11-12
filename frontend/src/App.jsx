@@ -8,6 +8,8 @@ import Analysis from "./pages/analysis/Analysis.jsx";
 import Home from "./pages/home/home.jsx";
 import Detail from "./pages/home/detail.jsx";
 import ActorReview from "./pages/home/actorReview.jsx";
+import Explore from "./pages/home/explore.jsx";
+
 
 function App() {
   return (
@@ -23,6 +25,7 @@ function App() {
 
       //네브바 x
       <Route element={<Layout nav={false} />}>
+        <Route path="/explore" element={<Explore />} />
         <Route path="/detail/:id" element={<Detail />} />
         <Route path="/detail/:id/actor/:name" element={<ActorReview />} />
       </Route>

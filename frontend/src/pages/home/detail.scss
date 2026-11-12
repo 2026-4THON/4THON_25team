@@ -123,7 +123,8 @@ $line: #cfe3f5;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
 
-    &:first-child {
+    &:first-child,
+    &:last-child {
       border-radius: 0 20px 0 0;
     }
 
