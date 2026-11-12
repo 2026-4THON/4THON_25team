@@ -1,0 +1,167 @@
+$blue: #0078d4;
+$label-gray: #4d4d4d;
+$chip-border: #a6cff0;
+$font: "Paperlogy", sans-serif;
+
+.step-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 26px 24px;
+  font-family: $font;
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+
+    &--half {
+      width: 149px;
+      flex: none;
+    }
+
+    &--pass {
+      width: 150px;
+      flex: none;
+    }
+  }
+
+  &__label {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: normal;
+    color: $label-gray;
+    white-space: nowrap;
+  }
+
+  &__input {
+    box-sizing: border-box;
+    height: 42px;
+    padding: 0 10px;
+    border: 1px solid $blue;
+    border-radius: 5px;
+    outline: 0;
+    background: #fff;
+    font-family: $font;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+
+    &--full {
+      width: 100%;
+    }
+
+    &--seat {
+      width: 65px;
+      padding: 0;
+      text-align: center;
+    }
+
+    &--wide {
+      width: 129px;
+      padding: 0;
+      text-align: center;
+    }
+  }
+
+  &__unit {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  &__unit-text {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  &__seats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 5px;
+    width: 336px;
+  }
+
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 63px;
+    height: 30px;
+    padding: 0 4px;
+    border: 0;
+    border-radius: 50px;
+    background: #fff;
+    font-family: $font;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+    white-space: nowrap;
+
+    &--add {
+      padding: 0;
+      font-size: 20px;
+      cursor: pointer;
+    }
+  }
+
+  &__options {
+    display: flex;
+    gap: 5px;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 32px;
+    padding: 5.585px 14.756px;
+    border: 1px solid $blue;
+    border-radius: 100px;
+    background: #fff;
+    font-family: $font;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &--companion {
+      width: 64px;
+      font-size: 13.867px;
+      letter-spacing: 0.6933px;
+    }
+
+    &--recommend {
+      gap: 5.333px;
+      width: 90px;
+      font-size: 14px;
+      letter-spacing: 0.7px;
+    }
+
+    &--selected {
+      background: $chip-border;
+    }
+  }
+}

@@ -1,0 +1,107 @@
+$font: "Paperlogy", sans-serif;
+
+.complete {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: linear-gradient(to top, #509cd8 11.058%, #b0d3f5 100%);
+  font-family: $font;
+  cursor: pointer;
+
+  &__band {
+    position: absolute;
+    left: 0;
+    width: 390px;
+    background: #fff;
+
+    &--top {
+      top: 0;
+      height: 89px;
+    }
+
+    &--bottom {
+      bottom: 0;
+      height: 65px;
+    }
+  }
+
+  &__line {
+    position: absolute;
+    left: 26px;
+    width: 338px;
+    height: 1.5px;
+    background: rgba(255, 255, 255, 0.5);
+
+    &--top {
+      top: 129px;
+    }
+
+    &--bottom {
+      top: 739px;
+    }
+  }
+
+  &__holes {
+    position: absolute;
+    left: 50%;
+    display: flex;
+    gap: 30px;
+    transform: translateX(-50%);
+    pointer-events: none;
+
+    &--top {
+      top: 78px;
+    }
+
+    &--bottom {
+      bottom: 54px;
+    }
+  }
+
+  &__hole {
+    width: 22px;
+    height: 22px;
+    border-radius: 81.818px;
+    background: #fff;
+    box-shadow: inset 0 2px 2px 0 #c7d9e5;
+  }
+
+  &__center {
+    position: absolute;
+    left: calc(50% + 0.5px);
+    top: calc(50% + 0.5px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 175px;
+    transform: translate(-50%, -50%);
+  }
+
+  &__logo {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 109px;
+    height: 109px;
+    border-radius: 100px;
+    background: #8e8e8e;
+    font-family: "Inter", $font;
+    font-size: 10px;
+    line-height: normal;
+    color: #000;
+  }
+
+  &__text {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 30px;
+    letter-spacing: 1px;
+    color: #fff;
+    white-space: nowrap;
+  }
+}
