@@ -6,6 +6,7 @@ import RecordDetail from "./pages/record/RecordDetail.jsx";
 import TicketRegister from "./pages/record/register/TicketRegister.jsx";
 import RegisterComplete from "./pages/record/register/RegisterComplete.jsx";
 import Analysis from "./pages/analysis/Analysis.jsx";
+import AnalysisSurvey from "./pages/analysis/survey/AnalysisSurvey.jsx";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path="/record/new/complete" element={<RegisterComplete />} />
       <Route path="/record/:id/edit" element={<TicketRegister mode="edit" />} />
       <Route path="/record/:id" element={<RecordDetail />} />
+      <Route path="/analysis/survey" element={<AnalysisSurvey />} />
     </Routes>
   );
 }
