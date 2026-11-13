@@ -1,0 +1,41 @@
+$blue: #0078d4;
+$gray-light: #aeaeae;
+
+.step-free {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  &__subtitle {
+    margin: 0;
+    padding-left: 4px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+  }
+
+  &__textarea {
+    display: block;
+    width: 338px;
+    height: 160px;
+    padding: 10px;
+    border: 1px solid $gray-light;
+    border-radius: 5px;
+    outline: 0;
+    background: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 15px;
+    color: #000;
+    resize: none;
+
+    &::placeholder {
+      color: $gray-light;
+    }
+
+    &:focus {
+      border-color: $blue;
+    }
+  }
+}
