@@ -1,5 +1,6 @@
 import { useState } from "react";
 import CastSheet from "./CastSheet.jsx";
+import { getShowCast } from "./registerMock.js";
 import iconSmileGood from "../../../assets/register/icon-smile-good.svg";
 import iconSmileNormal from "../../../assets/register/icon-smile-normal.svg";
 import iconSmileBad from "../../../assets/register/icon-smile-bad.svg";
@@ -186,6 +187,7 @@ const StepDetail = ({ form, onChange }) => {
 
       {castOpen && (
         <CastSheet
+          cast={getShowCast(form.show)}
           selected={form.casting}
           onDone={handleCastDone}
           onClose={() => setCastOpen(false)}

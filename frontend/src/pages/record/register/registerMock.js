@@ -1,3 +1,15 @@
+export const CAST_LIST = [
+  "전동석",
+  "이봄소리",
+  "규현",
+  "박지연",
+  "이지혜",
+  "박은태",
+  "김준수",
+  "유승현",
+];
+
+// cast 는 임시 목업(모든 공연 공통). 실제 데이터가 오면 공연별 배열로 교체한다.
 export const SHOWS = [
   {
     id: 1,
@@ -5,6 +17,7 @@ export const SHOWS = [
     title: "팬텀",
     venue: "홍익대 아트센터 대극장",
     runtime: 170,
+    cast: CAST_LIST,
   },
   {
     id: 2,
@@ -12,6 +25,7 @@ export const SHOWS = [
     title: "팬레터",
     venue: "홍익대 아트센터 대극장",
     runtime: 170,
+    cast: CAST_LIST,
   },
   {
     id: 3,
@@ -19,8 +33,13 @@ export const SHOWS = [
     title: "브라더스 까라마조프",
     venue: "홍익대 아트센터 대극장",
     runtime: 170,
+    cast: CAST_LIST,
   },
 ];
+
+// 공연에 cast가 있으면 그 목록, 없으면(임시 공연 객체 등) 전체 목록으로 대체
+export const getShowCast = (show) =>
+  Array.isArray(show?.cast) && show.cast.length > 0 ? show.cast : CAST_LIST;
 
 // 회차 데이터 연동 전 임시 규칙. 실제 데이터가 오면 getShowSessions 만 교체한다.
 export const SHOW_PERIOD = {
@@ -45,17 +64,6 @@ export const getShowSessions = (show, dateKey) => {
 };
 
 export const INITIAL_MONTH = { year: 2026, month: 11 };
-
-export const CAST_LIST = [
-  "전동석",
-  "이봄소리",
-  "규현",
-  "박지연",
-  "이지혜",
-  "박은태",
-  "김준수",
-  "유승현",
-];
 
 export const getEditForm = () => ({
   show: SHOWS[1],

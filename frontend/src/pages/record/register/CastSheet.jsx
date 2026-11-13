@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { CAST_LIST } from "./registerMock.js";
 import "./CastSheet.scss";
 
-const CastSheet = ({ selected, onDone, onClose }) => {
+const CastSheet = ({ cast, selected, onDone, onClose }) => {
   const [draft, setDraft] = useState(selected);
+  const castList = Array.isArray(cast) ? cast : [];
 
   const toggle = (name) => {
     setDraft((prev) =>
@@ -22,7 +22,7 @@ const CastSheet = ({ selected, onDone, onClose }) => {
           <h2 className="cast-sheet__title">전체 배우진</h2>
           <span className="cast-sheet__divider" />
           <div className="cast-sheet__list">
-            {CAST_LIST.map((name) => (
+            {castList.map((name) => (
               <button
                 key={name}
                 type="button"
