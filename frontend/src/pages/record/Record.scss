@@ -92,3 +92,11 @@ $font: "Paperlogy", sans-serif;
     list-style: none;
   }
 }
+
+.layout__screen:has(.record) {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

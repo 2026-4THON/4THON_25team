@@ -60,13 +60,9 @@ const TicketRegister = ({ mode = "create" }) => {
     setStep((prev) => prev - 1);
   };
 
-  const canSubmit = form.rating > 0 && form.review.trim() !== "";
-
   let canNext = true;
   if (step === 1) {
     canNext = Boolean(form.show && form.date && form.time);
-  } else if (step === LAST_STEP) {
-    canNext = canSubmit;
   }
 
   const handleNext = () => {

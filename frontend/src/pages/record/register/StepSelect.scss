@@ -134,6 +134,7 @@ $font: "Paperlogy", sans-serif;
   &__calendar {
     box-sizing: border-box;
     width: 338px;
+    min-height: 272px;
     padding-bottom: 7px;
     border: 1px solid $blue;
     border-radius: 5px;
@@ -155,6 +156,11 @@ $font: "Paperlogy", sans-serif;
     border: 0;
     background: none;
     cursor: pointer;
+
+    img {
+      width: 10px;
+      height: 18px;
+    }
   }
 
   &__month {
@@ -209,7 +215,7 @@ $font: "Paperlogy", sans-serif;
     }
 
     &--none {
-      color: #000;
+      color: $label-gray;
     }
 
     &--selected span {
