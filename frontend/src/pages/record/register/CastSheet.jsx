@@ -12,7 +12,7 @@ const CastSheet = ({ selected, onDone, onClose }) => {
   };
 
   const handleDone = () => {
-    onDone(CAST_LIST.filter((name) => draft.includes(name)));
+    onDone(draft);
   };
 
   return (

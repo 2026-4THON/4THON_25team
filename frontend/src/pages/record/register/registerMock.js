@@ -22,13 +22,27 @@ export const SHOWS = [
   },
 ];
 
+// 회차 데이터 연동 전 임시 규칙. 실제 데이터가 오면 getShowSessions 만 교체한다.
 export const SHOW_PERIOD = {
   start: "2026-11-09",
   end: "2026-11-27",
-  closedDates: ["2026-11-16", "2026-11-23"],
+  closedWeekday: 1,
 };
 
 export const SHOW_TIMES = ["14:30", "19:00"];
+
+// show: 선택한 공연, dateKey: "YYYY-MM-DD" → 그날 회차(시간) 목록, 공연 없으면 []
+export const getShowSessions = (show, dateKey) => {
+  if (!show || dateKey < SHOW_PERIOD.start || dateKey > SHOW_PERIOD.end) {
+    return [];
+  }
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const weekday = new Date(year, month - 1, day).getDay();
+  if (weekday === SHOW_PERIOD.closedWeekday && dateKey !== SHOW_PERIOD.start) {
+    return [];
+  }
+  return SHOW_TIMES;
+};
 
 export const INITIAL_MONTH = { year: 2026, month: 11 };
 

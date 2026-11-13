@@ -144,11 +144,31 @@ const getRawRecords = () => {
   return [...added, ...seeded];
 };
 
+// 관극 날짜(YYYY.MM.DD)+시간(HH:mm)을 숫자로 바꾼다. 시간이 없으면 00:00 으로 본다.
+export const getShowtimeValue = (record) => {
+  const [year, month, day] = String(record.date ?? "")
+    .split(".")
+    .map(Number);
+  const [hour, minute] = String(record.time || "00:00")
+    .split(":")
+    .map(Number);
+  const dateValue = (year || 0) * 10000 + (month || 0) * 100 + (day || 0);
+  return dateValue * 10000 + (hour || 0) * 100 + (minute || 0);
+};
+
+// 정렬 기준: 관극 날짜+시간, 같으면 id 오름차순. order 는 "oldest" | "latest".
+export const compareRecords = (a, b, order = "oldest") => {
+  const diff = getShowtimeValue(a) - getShowtimeValue(b);
+  if (diff !== 0) return order === "latest" ? -diff : diff;
+  return a.id - b.id;
+};
+
+// 번호(no)는 저장값을 쓰지 않고 관극 날짜+시간 오름차순 순위로 계산한다.
 export const getRecords = () => {
   const deleted = readDeleted();
   return getRawRecords()
     .filter((record) => !deleted.includes(record.id))
-    .sort((a, b) => a.no - b.no)
+    .sort((a, b) => compareRecords(a, b))
     .map((record, index) => ({ ...record, no: index + 1 }));
 };
 
