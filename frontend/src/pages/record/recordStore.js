@@ -5,10 +5,14 @@ import defaultPoster from "../../assets/record/poster-sample-1.png";
 // 백엔드 연동 전까지 쓰는 임시 저장소. API 가 오면 이 파일의 함수만 교체한다.
 const STORAGE_KEY = "4thon-record-store-v1";
 
+const isPlainObject = (value) =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
 const readItems = () => {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const parsed = raw ? JSON.parse(raw) : {};
+    return isPlainObject(parsed) ? parsed : {};
   } catch {
     return {};
   }
@@ -138,7 +142,8 @@ const getRawRecords = () => {
     items[record.id] ? { ...record, ...items[record.id].list } : record,
   );
   const added = Object.values(items)
-    .map((item) => item.list)
+    .map((item) => item?.list)
+    .filter(isPlainObject)
     .filter((list) => !RECORDS.some((record) => record.id === list.id))
     .map((list) => ({ ...list, poster: defaultPoster }));
   return [...added, ...seeded];
@@ -156,11 +161,11 @@ export const getShowtimeValue = (record) => {
   return dateValue * 10000 + (hour || 0) * 100 + (minute || 0);
 };
 
-// 정렬 기준: 관극 날짜+시간, 같으면 id 오름차순. order 는 "oldest" | "latest".
+// 정렬 기준: 관극 날짜+시간, 같으면 order가 oldest면 id 오름차순, latest면 id 내림차순. order 는 "oldest" | "latest".
 export const compareRecords = (a, b, order = "oldest") => {
   const diff = getShowtimeValue(a) - getShowtimeValue(b);
   if (diff !== 0) return order === "latest" ? -diff : diff;
-  return a.id - b.id;
+  return order === "latest" ? b.id - a.id : a.id - b.id;
 };
 
 // 번호(no)는 저장값을 쓰지 않고 관극 날짜+시간 오름차순 순위로 계산한다.
@@ -172,7 +177,25 @@ export const getRecords = () => {
     .map((record, index) => ({ ...record, no: index + 1 }));
 };
 
-export const getDetail = (id) => readItems()[id]?.detail ?? RECORD_DETAIL;
+const toArray = (value) => (Array.isArray(value) ? value : []);
+const toObject = (value) => (isPlainObject(value) ? value : {});
+
+// 저장된 detail 에 필드가 빠져 있어도 화면(RecordDetail)과 수정 폼(detailToForm)이
+// 죽지 않도록 .map/[0]/속성 접근을 하는 필드만 RECORD_DETAIL 과 같은 타입의 기본값으로 채운다.
+export const getDetail = (id) => {
+  const detail = readItems()[id]?.detail;
+  if (!isPlainObject(detail)) return RECORD_DETAIL;
+  return {
+    ...detail,
+    date: typeof detail.date === "string" ? detail.date : "",
+    seat: toArray(detail.seat),
+    cast: toArray(detail.cast),
+    actors: toArray(detail.actors),
+    pairActors: toArray(detail.pairActors),
+    expenses: toArray(detail.expenses),
+    actorReviews: toObject(detail.actorReviews),
+  };
+};
 
 export const getEditForm = (id) => detailToForm(getDetail(id));
 
