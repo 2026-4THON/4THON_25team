@@ -42,6 +42,9 @@ public class SecurityConfig {
                         corsConfigurationSource()
                 ))
 
+                // CSRF 보호 유지 + SPA 쿠키 기반 토큰 처리
+                .csrf(csrf -> csrf.spa())
+
                 // API 접근 권한
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -100,7 +103,11 @@ public class SecurityConfig {
         );
 
         config.setAllowedHeaders(
-                List.of("Content-Type", "X-CSRF-TOKEN")
+                List.of(
+                        "Content-Type",
+                        "X-CSRF-TOKEN",
+                        "X-XSRF-TOKEN"
+                )
         );
 
         config.setAllowCredentials(true);
