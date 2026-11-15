@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +19,7 @@ public class TicketReview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(
-            fetch = FetchType.LAZY,
-            optional = false
-    )
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ticket_id")
     private Ticket ticket;
 
@@ -31,6 +29,9 @@ public class TicketReview {
 
     @Lob
     private String content;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @OneToMany(
             mappedBy = "review",
@@ -49,10 +50,7 @@ public class TicketReview {
     private List<TicketReviewLike> likes =
             new ArrayList<>();
 
-    public TicketReview(
-            ReviewType type,
-            String content
-    ) {
+    public TicketReview(ReviewType type, String content) {
         this.type = type;
         this.content = content;
     }
@@ -61,14 +59,11 @@ public class TicketReview {
         this.ticket = ticket;
     }
 
-
     public void changeContent(String content) {
         this.content = content;
     }
 
-
     public void replaceActors(List<CatalogActor> cast) {
-
         boolean same = actors.size() == cast.size();
 
         if (same) {
@@ -92,15 +87,19 @@ public class TicketReview {
         }
     }
 
-    public void addActor(
-            CatalogActor actor,
-            int order
-    ) {
+    public void addActor(CatalogActor actor, int order) {
         TicketReviewActor reviewActor =
                 new TicketReviewActor(actor, order);
 
         reviewActor.attach(this);
         actors.add(reviewActor);
+    }
+
+    @PrePersist
+    void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
     }
 
     public enum ReviewType {
