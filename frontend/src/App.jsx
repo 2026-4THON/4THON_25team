@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate,Outlet} from "react-router-dom";
 import Layout from "./components/layout/Layout.jsx";
 import My from "./pages/my/my.jsx";
 import Map from "./pages/map/Map.jsx";
@@ -11,11 +11,24 @@ import Home from "./pages/home/home.jsx";
 import Detail from "./pages/home/detail.jsx";
 import ActorReview from "./pages/home/actorReview.jsx";
 import Explore from "./pages/home/explore.jsx";
+import Search from "./pages/home/search.jsx";
+import Start from "./pages/start/start.jsx";
+import { isLoggedIn } from "./auth.js";
 
+function RequireAuth() {
+  return isLoggedIn() ? <Outlet /> : <Navigate to="/start" replace />;
+}
 
 function App() {
   return (
     <Routes>
+      <Route element={<Layout nav={false} />}>
+        <Route
+          path="/start"
+          element={isLoggedIn() ? <Navigate to="/" replace /> : <Start />}
+        />
+      </Route>
+
       //네브바 o 
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
@@ -27,6 +40,7 @@ function App() {
 
       //네브바 x
       <Route element={<Layout nav={false} />}>
+        <Route path="/search" element={<Search />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/detail/:id" element={<Detail />} />
         <Route path="/detail/:id/actor/:name" element={<ActorReview />} />

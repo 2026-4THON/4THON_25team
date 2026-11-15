@@ -35,18 +35,34 @@ $divider: #e2e2e2;
     }
   }
 
-  &__heading {
+  &__explore {
+  position: absolute;
+  top: 59px;
+  left: 63px;
+  display: block;
+  width: 292px;
+  height: 38px;
+  padding: 0;
+  border: 1.5px solid #fac269;
+  border-radius: 100px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: normal;
+  color: #4d4d4d;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  img {
     position: absolute;
-    top: 69px;
-    left: 50%;
-    margin: 0;
-    transform: translateX(-50%);
-    font-size: 22px;
-    font-weight: 500;
-    line-height: normal;
-    color: $blue;
-    white-space: nowrap;
+    top: 50%;
+    right: 12px;
+    width: 9px;
+    height: 11px;
+    transform: translateY(-50%);
   }
+}
 
   // ---------- 작품 / 배우 ----------
   &__top {
@@ -83,19 +99,18 @@ $divider: #e2e2e2;
     line-height: normal;
   }
 
-  // 양옆이 흐려지는 배우 이름 띠
   &__actor {
-    padding: 15px 0;
-    background: linear-gradient(to right, #fff, $sky 50%, #fff);
-    border-top: 1.5px solid;
-    border-bottom: 1.5px solid;
-    border-image: linear-gradient(
-        to right,
-        rgba(166, 207, 240, 0),
-        #8fc2ec 50%,
-        rgba(166, 207, 240, 0)
-      )
-      1;
+  padding: 15px 0;
+  background: linear-gradient(to right, #fff, #fff3d7 50%, #fff); 
+  border-top: 1.5px solid;
+  border-bottom: 1.5px solid;
+  border-image: linear-gradient(
+      to right,
+      rgba(245, 213, 138, 0),
+      #f5d58a 50%,               // 위아래 선 색깔
+      rgba(245, 213, 138, 0)
+    )
+    1;
     text-align: center;
   }
 

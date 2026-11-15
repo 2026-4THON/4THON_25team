@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import "./explore.scss";
 
 import chevronIcon from "../../assets/home/chevron.svg"; 
-import ticketCard from "../../assets/home/ticket-card.svg"; 
 import playIcon from "../../assets/home/play.svg"; 
 
 import backIcon from "../../assets/home/back.svg";
@@ -50,6 +49,11 @@ const RESULTS = [1, 2, 3, 4].map((id) => ({
   genre: "뮤지컬",
   poster: posterSample,
 }));
+
+const TICKET_PATH = (() => {
+  const W = 338, H = 118, R = 5;
+  return `M${R} 0H${W - R}A${R} ${R} 0 0 0 ${W} ${R}V${H - R}A${R} ${R} 0 0 0 ${W - R} ${H}H${R}A${R} ${R} 0 0 0 0 ${H - R}V${R}A${R} ${R} 0 0 0 ${R} 0Z`;
+})();
 
 const STEP_TITLES = {
   situation: ["STEP 1", "자세한 탐색을 위한 상황을 입력해주세요"],
@@ -169,7 +173,7 @@ function Explore() {
 
         <button type="button" className="explore-result__home" onClick={() => navigate("/")}>
           홈으로 돌아가기
-          <img src={playIcon} alt="" />
+          <img src={chevronIcon} alt="" />
         </button>
       </div>
     );
@@ -278,6 +282,7 @@ function Explore() {
                   step={1}
                   value={budget}
                   onChange={(e) => setBudget(Number(e.target.value))}
+                  style={{ "--ratio": budget / 20 }} 
                   aria-label="1인 티켓 예산(만원)"
                 />
                 <span className="explore__budget-min">0원</span>
@@ -308,7 +313,9 @@ function Explore() {
                 aria-pressed={source === key}
               >
                 <span className="explore__option-box">
-                  <img src={ticketCard} alt="" />
+                    <svg className="explore__ticket" viewBox="0 0 338 118" aria-hidden="true">
+                        <path d={TICKET_PATH} />
+                    </svg>
                 </span>
                 <span className="explore__option-body">
                   <span className="explore__option-title">{title}</span>

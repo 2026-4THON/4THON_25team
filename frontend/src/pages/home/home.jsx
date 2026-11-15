@@ -6,6 +6,7 @@ import "./home.scss";
 import searchIcon from "../../assets/home/search.svg";
 import posterSample from "../../assets/home/poster.png";
 
+
 // 임시 데이터
 const ANALYSIS = "비극적인 서사와 깊은 감정선으로 여운을 남기는 작품을 선호해요";
 const REASON = "추천해주는 이유추천해주는\n이유추천해주는 이유";
@@ -102,6 +103,9 @@ function Home() {
 
   const recommended = filterItems(RECOMMENDED, recGenre, recMode).slice(0, 5); // 1~5순위까지만
   const popular = filterItems(POPULAR, popGenre, popMode);
+  const navigate = useNavigate();
+  
+
 
   // 검색 API 연동
   const handleSearch = (e) => {
@@ -110,15 +114,14 @@ function Home() {
 
   return (
     <div className="home">
-      <form className="home__search" onSubmit={handleSearch}>
+      <form className="home__search" onClick={() => navigate("/search")}>
         <input
           className="home__search-input"
           type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="진행중인 공연 검색"
+          placeholder="공연을 검색해보세요"
+          readOnly
         />
-        <button type="submit" className="home__search-btn" aria-label="검색">
+        <button type="button" className="home__search-btn" aria-label="검색">
           <img src={searchIcon} alt="" />
         </button>
       </form>
@@ -137,6 +140,7 @@ function Home() {
             <PosterCard key={item.id} item={item} rank={i + 1} showReason />
           ))}
         </div>
+        
       </section>
 
       <section className="home__section home__section--pop">

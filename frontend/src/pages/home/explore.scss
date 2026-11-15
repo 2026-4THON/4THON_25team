@@ -5,6 +5,7 @@ $line: #a6cff0;
 $rule: #7db8ea; 
 $gray: #aeaeae;
 $pick-bg: #d6e8f5;
+$ticket-on: #a6d1f3;
 
 
 .explore {
@@ -287,47 +288,64 @@ $pick-bg: #d6e8f5;
   }
 
   &__range {
-    -webkit-appearance: none;
-    appearance: none;
-    position: absolute;
-    top: 60px;
-    left: 30px;
-    width: 278px;
-    height: 18px;
-    margin: 0;
-    background: transparent;
-    cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  top: 60px;
+  left: 30px;
+  width: 278px;
+  height: 18px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
 
-    &::-webkit-slider-runnable-track {
-      height: 8px;
-      border-radius: 4px;
-      background: #e8f0f8;
-    }
+  // 손잡이 중심이 가는 길(양끝 9px씩 안쪽)에 맞춰 채움 길이를 계산해요
+  --fill: calc(9px + (100% - 18px) * var(--ratio, 0));
 
-    &::-moz-range-track {
-      height: 8px;
-      border-radius: 4px;
-      background: #e8f0f8;
-    }
-
-    &::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
-      margin-top: -5px; // 트랙 가운데에 맞춤
-      border: 0.732px solid $sort-blue;
-      border-radius: 50%;
-      background: $sort-blue;
-    }
-
-    &::-moz-range-thumb {
-      width: 17px;
-      height: 17px;
-      border: 0.732px solid $sort-blue;
-      border-radius: 50%;
-      background: $sort-blue;
-    }
+  // Chrome, Safari: 트랙 하나에 그라데이션으로 왼쪽만 칠해요
+  &::-webkit-slider-runnable-track {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(
+      to right,
+      $sort-blue 0,
+      $sort-blue var(--fill),
+      #e8f0f8 var(--fill)
+    );
   }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    margin-top: -5px; // 트랙 가운데에 맞춤
+    border: 0.732px solid $sort-blue;
+    border-radius: 50%;
+    background: $sort-blue;
+  }
+
+  &::-moz-range-track {
+    height: 8px;
+    border-radius: 4px;
+    background: #e8f0f8;
+  }
+
+  &::-moz-range-progress {
+    height: 8px;
+    border-radius: 4px;
+    background: $sort-blue;
+  }
+
+  &::-moz-range-thumb {
+    width: 17px;
+    height: 17px;
+    border: 0.732px solid $sort-blue;
+    border-radius: 50%;
+    background: $sort-blue;
+  }
+}
+
+
 
   // ---------- 희망사항 ----------
   &__wish {
@@ -357,76 +375,84 @@ $pick-bg: #d6e8f5;
   }
 
   &__option {
-    position: relative;
-    display: block;
-    width: 100%;
-    height: 138px;
-    padding: 0;
-    border: 0;
-    background: none;
-    font-family: inherit;
-    text-align: left;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 138px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 
-    // 티켓 모양 테두리 (시안 에셋을 그대로 사용)
-    &-box {
-      position: absolute;
-      top: 8px;
-      left: 11.5px;
-      width: 338px;
-      height: 117.8px;
-
-      img {
-        position: absolute;
-        inset: -2.46% -1.43% -5.74% -1.43%; // 시안의 에셋 여백
-        width: 103%;
-        height: 108%;
-        max-width: none;
-      }
-    }
-
-    &-body {
-      position: absolute;
-      top: 25px;
-      left: 30px;
-      display: flex;
-      flex-direction: column;
-      width: 300px;
-    }
-
-    &-title {
-      padding-bottom: 10px;
-      border-bottom: 1.5px solid $line;
-      font-size: 15px;
-      font-weight: 500;
-      line-height: normal;
-      color: #000;
-    }
-
-    &-desc {
-      margin-top: 10px;
-      font-size: 12px;
-      font-weight: 500;
-      line-height: 18px;
-      color: #4d4d4d;
-      white-space: pre-line;
-    }
-
-    &-quote {
-      padding: 8px 21px;
-      background: $sky;
-      font-size: 10px;
-      font-weight: 500;
-      line-height: normal;
-      color: $sort-blue;
-    }
-
-    // 선택 상태는 시안에 없어서 테두리에 은은한 파란 빛을 줬어요
-    &--on &-box img {
-      filter: drop-shadow(0 0 4px rgba(0, 120, 212, 0.55));
-    }
+  &-box {
+    position: absolute;
+    top: 8px;
+    left: 11.5px;
+    width: 338px;
+    height: 117.8px;
   }
+
+  &-body {
+    position: absolute;
+    top: 25px;
+    left: 30px;
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+  }
+
+  &-title {
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid $line;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+  }
+
+  &-desc {
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    color: #4d4d4d;
+    white-space: pre-line;
+  }
+
+  &-quote {
+    padding: 8px 21px;
+    background: $sky;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: normal;
+    color: $sort-blue;
+  }
+}
+
+// 코드로 그린 티켓 (평소 흰색, 선택하면 파랗게 채워져요)
+&__ticket {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: #fff;
+  stroke: $blue;
+  stroke-width: 1.5px;
+  filter: drop-shadow(0 2px 3px rgba(0, 120, 212, 0.2));
+  transition: fill 0.15s;
+}
+
+&__option--on &__option-title {
+  border-bottom-color: $sort-blue;
+}
+
+&__option--on &__ticket {
+  fill: $ticket-on;
+}
 
   // ---------- STEP 2-1: 장르 / 분위기 ----------
   &__genres {

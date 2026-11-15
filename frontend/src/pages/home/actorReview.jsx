@@ -6,8 +6,9 @@ import "./actorReview.scss";
 import backIcon from "../../assets/home/back.svg";
 import heartIcon from "../../assets/home/heart.svg"; 
 import heartFilledIcon from "../../assets/home/heart-filled.svg"; 
+import playIcon from "../../assets/home/chevron.svg";
 
-// TODO: API 연동 후 교체 (지금은 시안 기준 임시 데이터)
+// 임시 데이터
 const MOCK_WORK = { genre: "뮤지컬", title: "팬레터" };
 
 const MOCK_REVIEWS = [
@@ -88,7 +89,14 @@ function ActorReview() {
         >
           <img src={backIcon} alt="" />
         </button>
-        <h1 className="actor-review__heading">배우 후기</h1>
+        <button
+          type="button"
+          className="actor-review__explore"
+          onClick={() => navigate("/explore")}
+        >
+          내 상황에 맞춘 공연 탐색
+          <img src={playIcon} alt="" />
+        </button>
       </header>
 
       <section className="actor-review__top">
