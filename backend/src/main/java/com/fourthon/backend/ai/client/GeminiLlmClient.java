@@ -52,7 +52,7 @@ public class GeminiLlmClient implements LlmClient {
                         "temperature", geminiProperties.temperature()
                 )
         );
-        GenerateResponse response = GeminiCalls.call("Gemini 호출", () -> restClient.post()
+        GenerateResponse response = GeminiCalls.call("Gemini 호출(" + geminiProperties.model() + ")", () -> restClient.post()
                 .uri("/models/{model}:generateContent", geminiProperties.model())
                 .header(API_KEY_HEADER, apiKey)
                 .contentType(MediaType.APPLICATION_JSON)

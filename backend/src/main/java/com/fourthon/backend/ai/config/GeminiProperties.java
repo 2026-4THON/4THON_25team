@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 public record GeminiProperties(
         String apiKey,
         @DefaultValue("https://generativelanguage.googleapis.com/v1beta") String baseUrl,
-        @DefaultValue("gemini-3.8-flash") String model,
+        @DefaultValue("gemini-3.6-flash") String model,
         @DefaultValue("0.3") double temperature,
         @DefaultValue("gemini-embedding-2") String embeddingModel,
         @DefaultValue("768") int embeddingDimension

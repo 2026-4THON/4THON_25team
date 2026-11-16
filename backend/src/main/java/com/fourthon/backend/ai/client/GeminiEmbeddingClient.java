@@ -52,7 +52,7 @@ public class GeminiEmbeddingClient implements EmbeddingClient {
                 "content", Map.of("parts", List.of(Map.of("text", text))),
                 "outputDimensionality", geminiProperties.embeddingDimension()
         );
-        EmbedResponse response = GeminiCalls.call("Gemini 임베딩 호출", () -> restClient.post()
+        EmbedResponse response = GeminiCalls.call("Gemini 임베딩 호출(" + geminiProperties.embeddingModel() + ")", () -> restClient.post()
                 .uri("/models/{model}:embedContent", geminiProperties.embeddingModel())
                 .header(API_KEY_HEADER, geminiProperties.apiKey())
                 .contentType(MediaType.APPLICATION_JSON)
