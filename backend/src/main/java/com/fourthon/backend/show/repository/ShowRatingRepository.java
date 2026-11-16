@@ -37,6 +37,21 @@ public interface ShowRatingRepository extends Repository<Ticket, Long> {
             """)
     List<PerformanceRating> findSummaries(@Param("performanceIds") Collection<Long> performanceIds);
 
+    @Query("""
+            SELECT t.performance.id AS performanceId, COUNT(r) AS reviewCount
+            FROM TicketReview r JOIN r.ticket t
+            WHERE t.performance.id IN :performanceIds
+            GROUP BY t.performance.id
+            """)
+    List<ReviewCount> findReviewCounts(@Param("performanceIds") Collection<Long> performanceIds);
+
+    interface ReviewCount {
+
+        Long getPerformanceId();
+
+        Long getReviewCount();
+    }
+
     interface PerformanceRating {
 
         Long getPerformanceId();

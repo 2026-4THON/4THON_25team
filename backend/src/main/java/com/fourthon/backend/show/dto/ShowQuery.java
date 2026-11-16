@@ -53,4 +53,12 @@ public final class ShowQuery {
             LocalDate endDate
     ) {
     }
+
+    public record ExploreShow(
+            Candidate candidate,
+            Integer minPrice,
+            List<LocalDate> availableDates,
+            String synopsis
+    ) {
+    }
 }

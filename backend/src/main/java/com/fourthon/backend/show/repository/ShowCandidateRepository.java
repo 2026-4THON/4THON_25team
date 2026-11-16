@@ -9,6 +9,8 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 public interface ShowCandidateRepository extends Repository<ShowDetail, Long> {
@@ -30,6 +32,31 @@ public interface ShowCandidateRepository extends Repository<ShowDetail, Long> {
             @Param("ongoingOnly") boolean ongoingOnly,
             @Param("today") LocalDate today,
             @Param("userId") Long userId
+    );
+
+    @Query("""
+            SELECT p.id AS performanceId, p.title AS title, p.genre AS genre, p.posterUrl AS posterUrl,
+                   d.startDate AS startDate, d.endDate AS endDate, d.minPrice AS minPrice, d.synopsis AS synopsis
+            FROM ShowDetail d, CatalogPerformance p
+            WHERE p.id = d.performanceId
+              AND d.startDate <= :today
+              AND d.endDate >= :today
+              AND d.minPrice IS NOT NULL
+              AND d.minPrice <= :budget
+            """)
+    List<ExploreRow> findExploreCandidates(@Param("today") LocalDate today, @Param("budget") int budget);
+
+    @Query("""
+            SELECT s.performance.id AS performanceId, s.startsAt AS startsAt
+            FROM CatalogSession s
+            WHERE s.performance.id IN :performanceIds
+              AND s.startsAt >= :from
+              AND s.startsAt < :to
+            """)
+    List<SessionRow> findSessions(
+            @Param("performanceIds") Collection<Long> performanceIds,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to
     );
 
     @Query("SELECT MAX(r.rankedDate) FROM BoxOfficeRank r")
@@ -64,6 +91,20 @@ public interface ShowCandidateRepository extends Repository<ShowDetail, Long> {
         LocalDate getStartDate();
 
         LocalDate getEndDate();
+    }
+
+    interface ExploreRow extends ShowRow {
+
+        Integer getMinPrice();
+
+        String getSynopsis();
+    }
+
+    interface SessionRow {
+
+        Long getPerformanceId();
+
+        LocalDateTime getStartsAt();
     }
 
     interface RankedRow extends ShowRow {
