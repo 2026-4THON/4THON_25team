@@ -3,6 +3,7 @@ package com.fourthon.backend.show.service;
 import com.fourthon.backend.ai.client.AiException;
 import com.fourthon.backend.ai.client.LlmClient;
 import com.fourthon.backend.ai.prompt.PromptLoader;
+import com.fourthon.backend.common.domain.TagScores;
 import com.fourthon.backend.common.domain.TasteTag;
 import com.fourthon.backend.show.domain.ShowAnalysis;
 import com.fourthon.backend.ticket.domain.CatalogPerformance;
@@ -13,7 +14,6 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,7 +48,7 @@ public class ShowAnalyzer {
         )));
         LlmResult result = read(json);
         List<String> keywords = toKeywords(result.keywords());
-        Map<TasteTag, Double> scores = toScores(result.scores());
+        Map<TasteTag, Double> scores = TagScores.fromCodes(result.scores());
         if (keywords.isEmpty() || scores.values().stream().allMatch(score -> score == 0.0)) {
             throw new AiException("공연 분석 결과가 비어 있습니다");
         }
@@ -56,7 +56,7 @@ public class ShowAnalyzer {
     }
 
     public ShowAnalysis defaultAnalysis(CatalogPerformance.Genre genre) {
-        Map<TasteTag, Double> scores = emptyScores();
+        Map<TasteTag, Double> scores = TagScores.empty();
         if (genre == CatalogPerformance.Genre.PLAY) {
             scores.put(TasteTag.DRAMA, DEFAULT_GENRE_SCORE);
         } else if (genre == CatalogPerformance.Genre.MUSICAL) {
@@ -84,23 +84,6 @@ public class ShowAnalyzer {
                 .distinct()
                 .limit(KEYWORD_COUNT)
                 .toList();
-    }
-
-    private Map<TasteTag, Double> toScores(Map<String, Double> rawScores) {
-        Map<TasteTag, Double> scores = emptyScores();
-        if (rawScores == null) {
-            return scores;
-        }
-        rawScores.forEach((code, value) -> TasteTag.fromCode(code)
-                .filter(tag -> value != null)
-                .ifPresent(tag -> scores.put(tag, Math.max(0.0, Math.min(1.0, value)))));
-        return scores;
-    }
-
-    private Map<TasteTag, Double> emptyScores() {
-        Map<TasteTag, Double> scores = new EnumMap<>(TasteTag.class);
-        Arrays.stream(TasteTag.values()).forEach(tag -> scores.put(tag, 0.0));
-        return scores;
     }
 
     record LlmResult(
