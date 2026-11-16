@@ -3,15 +3,20 @@ package com.fourthon.backend.recommendation.controller;
 import com.fourthon.backend.auth.resolver.CurrentUser;
 import com.fourthon.backend.recommendation.domain.GenreTab;
 import com.fourthon.backend.recommendation.domain.HomeScope;
+import com.fourthon.backend.recommendation.dto.RecommendationRequest;
 import com.fourthon.backend.recommendation.dto.RecommendationResponse;
+import com.fourthon.backend.recommendation.service.ExploreService;
 import com.fourthon.backend.recommendation.service.HomeRecommendationService;
 import com.fourthon.backend.recommendation.service.PopularService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +25,7 @@ import java.util.List;
 
 @Tag(
         name = "추천 API",
-        description = "홈 취향 추천과 인기 공연"
+        description = "홈 취향 추천, 인기 공연, 탐색 추천"
 )
 @RestController
 @RequestMapping("/api/recommendations")
@@ -29,6 +34,7 @@ public class RecommendationController {
 
     private final HomeRecommendationService homeRecommendationService;
     private final PopularService popularService;
+    private final ExploreService exploreService;
 
     @Operation(
             summary = "홈 취향 추천",
@@ -49,5 +55,17 @@ public class RecommendationController {
             @RequestParam(defaultValue = "ALL") GenreTab genre) {
 
         return popularService.findPopular(genre);
+    }
+
+    @Operation(
+            summary = "탐색 추천",
+            description = "진행중·희망 날짜 회차·예산 조건으로 거른 뒤 최대 4개 추천. 조건에 맞는 공연이 없으면 status=NO_MATCH, 리포트가 없으면 404 TASTE_REPORT_NOT_FOUND"
+    )
+    @PostMapping("/explore")
+    public RecommendationResponse.Explore explore(
+            @Parameter(hidden = true) @CurrentUser Long userId,
+            @Valid @RequestBody RecommendationRequest.Explore request) {
+
+        return exploreService.explore(userId, request);
     }
 }

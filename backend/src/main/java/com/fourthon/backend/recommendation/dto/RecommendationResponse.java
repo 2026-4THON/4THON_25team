@@ -40,4 +40,24 @@ public final class RecommendationResponse {
             @Schema(description = "UPCOMING, ONGOING, ENDED") String status
     ) {
     }
+
+    @Schema(description = "BE-REC-03 탐색 추천 결과")
+    public record Explore(
+            @Schema(description = "OK, NO_MATCH(조건에 맞는 공연 없음)") String status,
+            @Schema(description = "요약 문구") String summary,
+            @Schema(description = "추천 공연 최대 4개") List<ExploreItem> items
+    ) {
+    }
+
+    public record ExploreItem(
+            Long performanceId,
+            String title,
+            @Schema(description = "MUSICAL, PLAY, ETC") String genre,
+            String posterUrl,
+            LocalDate startDate,
+            LocalDate endDate,
+            @Schema(description = "최저가 (원)") Integer minPrice,
+            @Schema(description = "희망 날짜 중 회차가 있는 날짜") List<LocalDate> availableDates
+    ) {
+    }
 }
