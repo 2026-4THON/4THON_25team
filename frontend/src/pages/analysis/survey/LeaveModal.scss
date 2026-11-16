@@ -1,0 +1,85 @@
+$header-blue: #509cd8;
+$gray-light: #aeaeae;
+
+.leave-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+
+  &__card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 289px;
+    height: 231px;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 211px;
+  }
+
+  &__icon {
+    display: block;
+  }
+
+  &__title {
+    margin: 10px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: 0.3px;
+    color: #000;
+    text-align: center;
+  }
+
+  &__desc {
+    margin: 5px 0 0;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: normal;
+    letter-spacing: 0.24px;
+    color: $gray-light;
+    text-align: center;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+  }
+
+  &__btn {
+    width: 211px;
+    height: 37px;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: 0.24px;
+    text-align: center;
+    cursor: pointer;
+
+    &--keep {
+      background: $header-blue;
+      color: #f9f4f0;
+    }
+
+    &--stop {
+      border: 2px solid $gray-light;
+      background: $gray-light;
+      color: #fff;
+    }
+  }
+}

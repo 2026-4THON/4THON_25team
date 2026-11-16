@@ -2,12 +2,7 @@ import { useState } from "react";
 import iconSearch from "../../../assets/register/icon-search.svg";
 import iconChevronLeft from "../../../assets/register/icon-chevron-left.svg";
 import iconChevronRight from "../../../assets/register/icon-chevron-right.svg";
-import {
-  SHOWS,
-  SHOW_PERIOD,
-  SHOW_TIMES,
-  INITIAL_MONTH,
-} from "./registerMock.js";
+import { SHOWS, INITIAL_MONTH, getShowSessions } from "./registerMock.js";
 import "./StepSelect.scss";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -15,15 +10,9 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const toDateKey = (year, month, day) =>
   `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-const getDayStatus = (dateKey) => {
-  if (
-    dateKey >= SHOW_PERIOD.start &&
-    dateKey <= SHOW_PERIOD.end &&
-    !SHOW_PERIOD.closedDates.includes(dateKey)
-  ) {
-    return "show";
-  }
-  return "none";
+const toMinutes = (time) => {
+  const [hour, minute] = time.split(":").map(Number);
+  return (hour || 0) * 60 + (minute || 0);
 };
 
 const StepSelect = ({ form, onChange }) => {
@@ -65,6 +54,13 @@ const StepSelect = ({ form, onChange }) => {
     ...Array(firstWeekday).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
+
+  // 수정 화면에서 불러온 시간이 회차에 없어도 선택된 채로 보이게 한다.
+  const sessions = form.date ? getShowSessions(form.show, form.date) : [];
+  const times =
+    form.time && !sessions.includes(form.time)
+      ? [...sessions, form.time].sort((a, b) => toMinutes(a) - toMinutes(b))
+      : sessions;
 
   return (
     <div className="step-select">
@@ -154,14 +150,20 @@ const StepSelect = ({ form, onChange }) => {
                   return <span key={`empty-${i}`} />;
                 }
                 const dateKey = toDateKey(view.year, view.month, day);
-                const status = getDayStatus(dateKey);
+                const hasSession =
+                  getShowSessions(form.show, dateKey).length > 0;
+                const status = hasSession ? "show" : "none";
                 const selected = form.date === dateKey;
                 return (
                   <button
                     key={dateKey}
                     type="button"
                     className={`step-select__day step-select__day--${status}${selected ? " step-select__day--selected" : ""}`}
-                    onClick={() => onChange({ date: dateKey, time: "" })}
+                    disabled={!hasSession}
+                    onClick={() => {
+                      if (selected) return;
+                      onChange({ date: dateKey, time: "" });
+                    }}
                   >
                     <span>{day}</span>
                   </button>
@@ -176,7 +178,7 @@ const StepSelect = ({ form, onChange }) => {
         <section className="step-select__section">
           <p className="step-select__label">관람 시간을 선택해주세요</p>
           <div className="step-select__times">
-            {SHOW_TIMES.map((time) => (
+            {times.map((time) => (
               <button
                 key={time}
                 type="button"

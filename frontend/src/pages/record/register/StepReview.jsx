@@ -1,5 +1,6 @@
 import { useState } from "react";
 import CastSheet from "./CastSheet.jsx";
+import { getShowCast } from "./registerMock.js";
 import iconStarFilled from "../../../assets/register/icon-star-lg-filled.svg";
 import iconStarEmpty from "../../../assets/register/icon-star-lg-empty.svg";
 import "./StepReview.scss";
@@ -104,6 +105,7 @@ const StepReview = ({ form, onChange }) => {
 
       {pairOpen && (
         <CastSheet
+          cast={getShowCast(form.show)}
           selected={form.pair}
           onDone={handlePairDone}
           onClose={() => setPairOpen(false)}

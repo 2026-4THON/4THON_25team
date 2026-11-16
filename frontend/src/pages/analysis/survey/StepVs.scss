@@ -1,0 +1,78 @@
+$blue: #0078d4;
+$label-gray: #4d4d4d;
+$gray-light: #aeaeae;
+$chip-bg: #d6e8f5;
+
+.step-vs {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  // 문항 목록이 소제목 윗변에서 38px 아래에 오도록 소제목을 위에 고정한다.
+  &__group {
+    position: relative;
+    padding-top: 38px;
+  }
+
+  &__subtitle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  &__pairs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 330px;
+    margin-left: 4px;
+  }
+
+  &__pair {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  &__vs {
+    flex: none;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: normal;
+    color: $label-gray;
+  }
+
+  &__option {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 140px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid $gray-light;
+    border-radius: 5px;
+    background: $chip-bg;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: 0.65px;
+    color: $label-gray;
+    text-align: center;
+    cursor: pointer;
+
+    &--selected {
+      border: 1.5px solid $blue;
+      background: #fff;
+      font-weight: 500;
+      color: #000;
+    }
+  }
+}
