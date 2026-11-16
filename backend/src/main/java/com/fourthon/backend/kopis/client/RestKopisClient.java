@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -115,6 +116,9 @@ public class RestKopisClient implements KopisClient {
                     .retrieve()
                     .body(byte[].class);
             return KopisXmlReader.parse(body);
+        } catch (RestClientResponseException e) {
+            throw new KopisBlockedException(
+                    "KOPIS가 요청을 거부했습니다: " + path + " (" + e.getStatusCode().value() + ")", e);
         } catch (RestClientException e) {
             throw new KopisException("KOPIS 호출에 실패했습니다: " + path, e);
         }

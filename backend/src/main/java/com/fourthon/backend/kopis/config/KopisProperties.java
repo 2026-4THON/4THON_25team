@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public record KopisProperties(
         String apiKey,
         @DefaultValue("http://www.kopis.or.kr/openApi/restful") String baseUrl,
-        @DefaultValue("150") long requestIntervalMillis,
+        @DefaultValue("1000") long requestIntervalMillis,
         @DefaultValue Sync sync
 ) {
 

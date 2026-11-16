@@ -1,10 +1,13 @@
 package com.fourthon.backend.kopis.service;
 
+import com.fourthon.backend.kopis.client.KopisBlockedException;
 import com.fourthon.backend.kopis.client.KopisClient;
 import com.fourthon.backend.kopis.client.KopisResponse;
 import com.fourthon.backend.kopis.config.KopisProperties;
+import com.fourthon.backend.kopis.domain.KopisExcludedShow;
 import com.fourthon.backend.kopis.domain.SyncState;
 import com.fourthon.backend.kopis.parser.SessionParser;
+import com.fourthon.backend.kopis.repository.KopisExcludedShowRepository;
 import com.fourthon.backend.kopis.repository.SyncStateRepository;
 import com.fourthon.backend.show.dto.ShowSync;
 import com.fourthon.backend.show.service.BoxOfficeService;
@@ -26,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,6 +46,7 @@ public class KopisSyncService {
     private final CatalogWriter catalogWriter;
     private final SessionParser sessionParser;
     private final SyncStateRepository syncStateRepository;
+    private final KopisExcludedShowRepository kopisExcludedShowRepository;
     private final ShowDetailService showDetailService;
     private final BoxOfficeService boxOfficeService;
     private final KopisProperties kopisProperties;
@@ -67,9 +72,11 @@ public class KopisSyncService {
         try {
             LocalDateTime now = LocalDateTime.now(SEOUL);
             LocalDate today = now.toLocalDate();
-            syncShows(now);
+            boolean completed = syncShows(now);
             extendSessions(today);
-            syncBoxOffice(today.minusDays(1));
+            if (completed) {
+                syncBoxOffice(today.minusDays(1));
+            }
         } catch (RuntimeException e) {
             log.error("KOPIS 동기화 실패", e);
         } finally {
@@ -77,35 +84,62 @@ public class KopisSyncService {
         }
     }
 
-    private void syncShows(LocalDateTime now) {
+    private boolean syncShows(LocalDateTime now) {
         LocalDate today = now.toLocalDate();
         SyncState state = syncStateRepository.findById(SHOW_SYNC)
                 .orElseGet(() -> new SyncState(SHOW_SYNC));
+        boolean firstSync = state.getLastSuccessDate() == null;
         Set<String> kopisIds = collectKopisIds(today, state.getLastSuccessDate());
-        log.info("KOPIS 공연 동기화 시작: 대상 {}건, 기준일 {}", kopisIds.size(), state.getLastSuccessDate());
+        Set<String> targets = selectTargets(kopisIds, firstSync);
+        log.info("KOPIS 공연 동기화 시작: 목록 {}건 중 요청 대상 {}건, 기준일 {}",
+                kopisIds.size(), targets.size(), state.getLastSuccessDate());
 
         SyncCount count = new SyncCount();
-        for (String kopisId : kopisIds) {
+        boolean blocked = false;
+        for (String kopisId : targets) {
             try {
                 importOne(kopisId, now, count);
+            } catch (KopisBlockedException e) {
+                blocked = true;
+                log.error("KOPIS가 요청을 막아 동기화를 중단합니다. 남은 공연은 다음 실행에서 이어서 받습니다", e);
+                break;
             } catch (RuntimeException e) {
                 count.failed++;
                 log.warn("KOPIS 공연 동기화 실패: {}", kopisId, e);
             }
         }
-        log.info("KOPIS 공연 동기화 종료: 추가 {}, 갱신 {}, 변경 없음 {}, 대학로 아님 {}, 실패 {}",
-                count.created, count.updated, count.skipped, count.notDaehakro, count.failed);
+        int processed = count.created + count.updated + count.skipped + count.notDaehakro + count.failed;
+        log.info("KOPIS 공연 동기화 종료: 추가 {}, 갱신 {}, 변경 없음 {}, 대학로 아님 {}, 실패 {}, 남음 {}",
+                count.created, count.updated, count.skipped, count.notDaehakro, count.failed,
+                targets.size() - processed);
 
-        if (count.failed == 0) {
+        if (!blocked && count.failed == 0) {
             state.markSuccess(today);
             syncStateRepository.save(state);
         }
+        return !blocked;
+    }
+
+    private Set<String> selectTargets(Set<String> kopisIds, boolean firstSync) {
+        Set<String> targets = new LinkedHashSet<>(kopisIds);
+        targets.removeAll(kopisExcludedShowRepository.findAllById(kopisIds).stream()
+                .map(KopisExcludedShow::getKopisId)
+                .collect(Collectors.toSet()));
+        if (firstSync) {
+            targets.removeAll(showDetailService.findPerformanceIds(kopisIds).keySet());
+        }
+        return targets;
     }
 
     private void importOne(String kopisId, LocalDateTime now, SyncCount count) {
         KopisResponse.PerformanceDetail detail = kopisClient.fetchPerformanceDetail(kopisId)
                 .orElse(null);
-        if (detail == null || !detail.daehakro()) {
+        if (detail == null) {
+            count.notDaehakro++;
+            return;
+        }
+        if (!detail.daehakro()) {
+            kopisExcludedShowRepository.save(new KopisExcludedShow(kopisId, now));
             count.notDaehakro++;
             return;
         }
