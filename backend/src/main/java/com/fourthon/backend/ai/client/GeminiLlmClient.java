@@ -2,11 +2,13 @@ package com.fourthon.backend.ai.client;
 
 import com.fourthon.backend.ai.config.GeminiProperties;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.time.Duration;
 import java.util.List;
@@ -35,11 +37,17 @@ public class GeminiLlmClient implements LlmClient {
     }
 
     @Override
-    public String generateJson(String prompt) {
+    public boolean isConfigured() {
         String apiKey = geminiProperties.apiKey();
-        if (apiKey == null || apiKey.isBlank()) {
+        return apiKey != null && !apiKey.isBlank();
+    }
+
+    @Override
+    public String generateJson(String prompt) {
+        if (!isConfigured()) {
             throw new AiException("GEMINI_API_KEY가 설정되지 않았습니다");
         }
+        String apiKey = geminiProperties.apiKey();
         Map<String, Object> body = Map.of(
                 "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
                 "generationConfig", Map.of(
@@ -56,6 +64,11 @@ public class GeminiLlmClient implements LlmClient {
                     .retrieve()
                     .body(GenerateResponse.class);
             return stripCodeFence(extractText(response));
+        } catch (RestClientResponseException e) {
+            if (e.getStatusCode().isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS)) {
+                throw new AiRateLimitException("Gemini 요청 한도를 넘었습니다", e);
+            }
+            throw new AiException("Gemini 호출에 실패했습니다: " + e.getStatusCode().value(), e);
         } catch (RestClientException e) {
             throw new AiException("Gemini 호출에 실패했습니다", e);
         }
