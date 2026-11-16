@@ -1,6 +1,6 @@
 package com.fourthon.backend.recommendation.service;
 
-import com.fourthon.backend.ai.client.AiRateLimitException;
+import com.fourthon.backend.ai.client.AiUnavailableException;
 import com.fourthon.backend.ai.dto.ReviewAnalysisResult;
 import com.fourthon.backend.ai.service.ReviewSearchService;
 import com.fourthon.backend.common.client.RequestThrottle;
@@ -141,8 +141,8 @@ public class RecommendationReasonService {
                 try {
                     saved += generateFor(userId);
                     users++;
-                } catch (AiRateLimitException e) {
-                    log.error("Gemini 요청 한도에 걸려 추천 이유 배치를 중단합니다", e);
+                } catch (AiUnavailableException e) {
+                    log.error("Gemini를 지금 쓸 수 없어(한도 초과 또는 과부하) 추천 이유 배치를 중단합니다", e);
                     break;
                 } catch (RuntimeException e) {
                     log.warn("추천 이유 생성 실패: userId={}", userId, e);
@@ -188,7 +188,7 @@ public class RecommendationReasonService {
                 .collect(Collectors.joining(", "));
         try {
             return reviewSearchService.embedQuery(context.briefing() + "\n좋아하는 장르·분위기: " + topTags);
-        } catch (AiRateLimitException e) {
+        } catch (AiUnavailableException e) {
             throw e;
         } catch (RuntimeException e) {
             log.warn("추천 이유 근거 검색용 임베딩 실패, 후기 없이 생성합니다", e);

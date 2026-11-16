@@ -2,13 +2,10 @@ package com.fourthon.backend.ai.client;
 
 import com.fourthon.backend.ai.config.GeminiProperties;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestClientResponseException;
 
 import java.time.Duration;
 import java.util.List;
@@ -55,23 +52,14 @@ public class GeminiEmbeddingClient implements EmbeddingClient {
                 "content", Map.of("parts", List.of(Map.of("text", text))),
                 "outputDimensionality", geminiProperties.embeddingDimension()
         );
-        try {
-            EmbedResponse response = restClient.post()
-                    .uri("/models/{model}:embedContent", geminiProperties.embeddingModel())
-                    .header(API_KEY_HEADER, geminiProperties.apiKey())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(body)
-                    .retrieve()
-                    .body(EmbedResponse.class);
-            return normalize(extractValues(response));
-        } catch (RestClientResponseException e) {
-            if (e.getStatusCode().isSameCodeAs(HttpStatus.TOO_MANY_REQUESTS)) {
-                throw new AiRateLimitException("Gemini 요청 한도를 넘었습니다", e);
-            }
-            throw new AiException("Gemini 임베딩 호출에 실패했습니다: " + e.getStatusCode().value(), e);
-        } catch (RestClientException e) {
-            throw new AiException("Gemini 임베딩 호출에 실패했습니다", e);
-        }
+        EmbedResponse response = GeminiCalls.call("Gemini 임베딩 호출", () -> restClient.post()
+                .uri("/models/{model}:embedContent", geminiProperties.embeddingModel())
+                .header(API_KEY_HEADER, geminiProperties.apiKey())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .body(EmbedResponse.class));
+        return normalize(extractValues(response));
     }
 
     private List<Float> extractValues(EmbedResponse response) {

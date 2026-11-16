@@ -1,6 +1,6 @@
 package com.fourthon.backend.ai.service;
 
-import com.fourthon.backend.ai.client.AiRateLimitException;
+import com.fourthon.backend.ai.client.AiUnavailableException;
 import com.fourthon.backend.ai.client.EmbeddingClient;
 import com.fourthon.backend.ai.config.ReviewAnalysisProperties;
 import com.fourthon.backend.ai.domain.ReviewAnalysisFailure;
@@ -186,8 +186,8 @@ public class ReviewAnalysisService {
                 if (source.isPerformanceReview()) {
                     outcome.changedPerformanceIds.add(source.performanceId());
                 }
-            } catch (AiRateLimitException e) {
-                log.error("Gemini 요청 한도에 걸려 후기 분석을 중단합니다. 남은 후기는 다음 추천 때 다시 시도합니다", e);
+            } catch (AiUnavailableException e) {
+                log.error("Gemini를 지금 쓸 수 없어(한도 초과 또는 과부하) 후기 분석을 중단합니다. 남은 후기는 다음 추천 때 다시 시도합니다", e);
                 outcome.stopped = true;
                 break;
             } catch (RuntimeException e) {

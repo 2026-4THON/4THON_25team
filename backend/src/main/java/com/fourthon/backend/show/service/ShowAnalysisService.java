@@ -1,6 +1,6 @@
 package com.fourthon.backend.show.service;
 
-import com.fourthon.backend.ai.client.AiRateLimitException;
+import com.fourthon.backend.ai.client.AiUnavailableException;
 import com.fourthon.backend.common.client.RequestThrottle;
 import com.fourthon.backend.show.config.ShowAnalysisProperties;
 import com.fourthon.backend.show.domain.ShowAnalysis;
@@ -87,8 +87,8 @@ public class ShowAnalysisService {
         for (Long performanceId : targets) {
             try {
                 analyzeOne(performanceId, count);
-            } catch (AiRateLimitException e) {
-                log.error("Gemini 요청 한도에 걸려 공연 분석을 중단합니다. 남은 공연은 다음 실행에서 이어서 분석합니다", e);
+            } catch (AiUnavailableException e) {
+                log.error("Gemini를 지금 쓸 수 없어(한도 초과 또는 과부하) 공연 분석을 중단합니다. 남은 공연은 다음 실행에서 이어서 분석합니다", e);
                 break;
             } catch (RuntimeException e) {
                 count.failed++;
