@@ -14,11 +14,13 @@ import com.fourthon.backend.taste.domain.VsChoice;
 import com.fourthon.backend.taste.domain.VsQuestion;
 import com.fourthon.backend.taste.dto.TasteRequest;
 import com.fourthon.backend.taste.dto.TasteResponse;
+import com.fourthon.backend.taste.event.TasteReportSavedEvent;
 import com.fourthon.backend.taste.repository.TasteReportRepository;
 import com.fourthon.backend.taste.repository.TicketRatingRepository;
 import com.fourthon.backend.taste.repository.UserTasteScoreRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
@@ -50,6 +52,7 @@ public class TasteService {
     private final TicketRatingRepository ticketRatingRepository;
     private final ShowTagScoreService showTagScoreService;
     private final TransactionTemplate transactionTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     public TasteResponse.Report getReport(Long userId) {
         return transactionTemplate.execute(status -> TasteResponse.Report.from(requireReport(userId)));
@@ -61,23 +64,27 @@ public class TasteService {
         }
         TasteAnswers answers = toAnswers(request);
         TasteAnalysis analysis = tasteAnalyzer.analyze(answers);
-        return transactionTemplate.execute(status -> {
+        TasteResponse.Report saved = transactionTemplate.execute(status -> {
             TasteReport report = tasteReportRepository.save(new TasteReport(userId, answers, analysis, now()));
             replaceScores(report);
             return TasteResponse.Report.from(report);
         });
+        eventPublisher.publishEvent(new TasteReportSavedEvent(userId, false));
+        return saved;
     }
 
     public TasteResponse.Report update(Long userId, TasteRequest.Save request) {
         requireReport(userId);
         TasteAnswers answers = toAnswers(request);
         TasteAnalysis analysis = tasteAnalyzer.analyze(answers);
-        return transactionTemplate.execute(status -> {
+        TasteResponse.Report updated = transactionTemplate.execute(status -> {
             TasteReport report = requireReport(userId);
             report.update(answers, analysis, now());
             replaceScores(report);
             return TasteResponse.Report.from(report);
         });
+        eventPublisher.publishEvent(new TasteReportSavedEvent(userId, true));
+        return updated;
     }
 
     public void recalculateScores(Long userId) {
@@ -85,6 +92,10 @@ public class TasteService {
         requiresNew.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         requiresNew.executeWithoutResult(status ->
                 tasteReportRepository.findByUserId(userId).ifPresent(this::replaceScores));
+    }
+
+    public List<Long> findUserIdsWithReport() {
+        return tasteReportRepository.findAllUserIds();
     }
 
     public Optional<String> findBriefing(Long userId) {

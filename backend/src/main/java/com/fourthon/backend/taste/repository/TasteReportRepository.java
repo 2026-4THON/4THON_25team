@@ -16,6 +16,9 @@ public interface TasteReportRepository extends JpaRepository<TasteReport, Long> 
 
     boolean existsByUserId(Long userId);
 
+    @Query("SELECT r.userId FROM TasteReport r ORDER BY r.userId")
+    List<Long> findAllUserIds();
+
     @Query("""
             SELECT DISTINCT r.userId
             FROM TasteReport r JOIN r.lifeWorks w

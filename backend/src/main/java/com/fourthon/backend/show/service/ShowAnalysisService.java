@@ -6,6 +6,7 @@ import com.fourthon.backend.show.config.ShowAnalysisProperties;
 import com.fourthon.backend.show.domain.ShowAnalysis;
 import com.fourthon.backend.show.domain.ShowDetail;
 import com.fourthon.backend.show.domain.ShowTagScore;
+import com.fourthon.backend.show.event.ShowAnalysisCompletedEvent;
 import com.fourthon.backend.show.repository.ShowDetailRepository;
 import com.fourthon.backend.show.repository.ShowTagScoreRepository;
 import com.fourthon.backend.ticket.domain.CatalogPerformance;
@@ -14,6 +15,7 @@ import com.fourthon.backend.ticket.repository.CatalogPerformanceRepository;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -42,6 +44,7 @@ public class ShowAnalysisService {
     private final ShowAnalysisProperties showAnalysisProperties;
     private final RequestThrottle showAnalysisThrottle;
     private final TransactionTemplate transactionTemplate;
+    private final ApplicationEventPublisher eventPublisher;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final ExecutorService runner = Executors.newSingleThreadExecutor(
             runnable -> new Thread(runnable, "show-analysis")
@@ -97,6 +100,7 @@ public class ShowAnalysisService {
         log.info("공연 분석 종료: AI 분석 {}, 장르 기본값 {}, 실패 {}, 남음 {}",
                 count.analyzed, count.defaulted, count.failed,
                 targets.size() - count.analyzed - count.defaulted - count.failed);
+        eventPublisher.publishEvent(new ShowAnalysisCompletedEvent(count.analyzed + count.defaulted));
     }
 
     private void analyzeOne(Long performanceId, AnalysisCount count) {
