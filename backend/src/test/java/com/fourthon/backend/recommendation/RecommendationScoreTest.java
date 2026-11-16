@@ -34,7 +34,9 @@ class RecommendationScoreTest {
                     new RecommendationProperties.HomeWeights(0.45, 0.30, 0.15, 0.10)),
             9,
             24,
-            new RecommendationProperties.Reason(3, 300, 40, 4000)
+            new RecommendationProperties.Reason(3, 300, 40, 4000),
+            new RecommendationProperties.Explore(4, 50, 0.3, 10, 300,
+                    new RecommendationProperties.ExploreWeights(0.35, 0.25, 0.25, 0.10, 0.05))
     );
     private final Map<FactorType, Double> weights = properties.home().weights().toMap();
     private final Map<TasteTag, Double> taste = Map.of(
