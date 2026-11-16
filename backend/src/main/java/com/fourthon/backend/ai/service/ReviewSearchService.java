@@ -2,6 +2,7 @@ package com.fourthon.backend.ai.service;
 
 import com.fourthon.backend.ai.client.EmbeddingClient;
 import com.fourthon.backend.ai.domain.ReviewEmbedding;
+import com.fourthon.backend.ai.domain.VectorCodec;
 import com.fourthon.backend.ai.dto.ReviewAnalysisResult;
 import com.fourthon.backend.ai.repository.ReviewEmbeddingRepository;
 import com.fourthon.backend.ai.repository.ReviewSourceRepository;
@@ -37,6 +38,15 @@ public class ReviewSearchService {
         return embeddingClient.embed(text);
     }
 
+    public String model() {
+        return embeddingClient.model();
+    }
+
+    public Map<Long, float[]> findVectors(Long performanceId) {
+        return reviewEmbeddingRepository.findByPerformanceIdAndModel(performanceId, embeddingClient.model()).stream()
+                .collect(Collectors.toMap(ReviewEmbedding::getReviewId, ReviewEmbedding::values, (left, right) -> left));
+    }
+
     public List<ReviewAnalysisResult.Evidence> findSimilar(
             Long performanceId,
             float[] query,
@@ -46,7 +56,7 @@ public class ReviewSearchService {
         List<Scored> ranked = reviewEmbeddingRepository
                 .findByPerformanceIdAndModel(performanceId, embeddingClient.model()).stream()
                 .filter(embedding -> embedding.getDimension() == query.length)
-                .map(embedding -> new Scored(embedding.getReviewId(), dot(query, embedding.values())))
+                .map(embedding -> new Scored(embedding.getReviewId(), VectorCodec.dot(query, embedding.values())))
                 .sorted(Comparator.comparingDouble(Scored::similarity).reversed())
                 .limit((long) limit * CANDIDATE_MULTIPLIER)
                 .toList();
@@ -67,14 +77,6 @@ public class ReviewSearchService {
                         scored.similarity()
                 ))
                 .toList();
-    }
-
-    private double dot(float[] left, float[] right) {
-        double sum = 0.0;
-        for (int i = 0; i < left.length; i++) {
-            sum += left[i] * right[i];
-        }
-        return sum;
     }
 
     private record Scored(

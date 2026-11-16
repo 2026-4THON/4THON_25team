@@ -16,8 +16,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.time.LocalDateTime;
 
 @Entity
@@ -72,19 +70,11 @@ public class ReviewEmbedding {
         this.reviewType = source.type();
         this.model = model;
         this.dimension = values.length;
-        this.vector = toBytes(values);
+        this.vector = VectorCodec.toBytes(values);
         this.createdAt = createdAt;
     }
 
     public float[] values() {
-        float[] values = new float[dimension];
-        ByteBuffer.wrap(vector).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer().get(values);
-        return values;
-    }
-
-    private static byte[] toBytes(float[] values) {
-        ByteBuffer buffer = ByteBuffer.allocate(values.length * Float.BYTES).order(ByteOrder.LITTLE_ENDIAN);
-        buffer.asFloatBuffer().put(values);
-        return buffer.array();
+        return VectorCodec.fromBytes(vector);
     }
 }
