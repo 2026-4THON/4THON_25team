@@ -110,10 +110,10 @@ public class RestKopisClient implements KopisClient {
         }
         kopisThrottle.acquire();
         try {
-            String body = kopisRestClient.get()
+            byte[] body = kopisRestClient.get()
                     .uri(uriBuilder -> buildUri(uriBuilder, path, apiKey, params))
                     .retrieve()
-                    .body(String.class);
+                    .body(byte[].class);
             return KopisXmlReader.parse(body);
         } catch (RestClientException e) {
             throw new KopisException("KOPIS 호출에 실패했습니다: " + path, e);
