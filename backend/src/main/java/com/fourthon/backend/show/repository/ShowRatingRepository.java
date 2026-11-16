@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ShowRatingRepository extends Repository<Ticket, Long> {
@@ -27,6 +28,23 @@ public interface ShowRatingRepository extends Repository<Ticket, Long> {
 
     @Query("SELECT AVG(t.ratingHalfUnits) FROM Ticket t")
     Double findAverageHalfUnits();
+
+    @Query("""
+            SELECT t.performance.id AS performanceId, COUNT(t) AS ratingCount, AVG(t.ratingHalfUnits) AS averageHalfUnits
+            FROM Ticket t
+            WHERE t.performance.id IN :performanceIds
+            GROUP BY t.performance.id
+            """)
+    List<PerformanceRating> findSummaries(@Param("performanceIds") Collection<Long> performanceIds);
+
+    interface PerformanceRating {
+
+        Long getPerformanceId();
+
+        Long getRatingCount();
+
+        Double getAverageHalfUnits();
+    }
 
     interface RatingSummary {
 

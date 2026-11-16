@@ -1,0 +1,73 @@
+package com.fourthon.backend.show.repository;
+
+import com.fourthon.backend.show.domain.ShowDetail;
+import com.fourthon.backend.ticket.domain.CatalogPerformance;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDate;
+import java.util.List;
+
+public interface ShowCandidateRepository extends Repository<ShowDetail, Long> {
+
+    @Query("""
+            SELECT p.id AS performanceId, p.title AS title, p.genre AS genre, p.posterUrl AS posterUrl,
+                   d.startDate AS startDate, d.endDate AS endDate
+            FROM ShowDetail d, CatalogPerformance p
+            WHERE p.id = d.performanceId
+              AND d.analyzedAt IS NOT NULL
+              AND (:genre IS NULL OR p.genre = :genre)
+              AND (:ongoingOnly = false OR (d.startDate <= :today AND d.endDate >= :today))
+              AND d.performanceId NOT IN (
+                  SELECT t.performance.id FROM Ticket t WHERE t.user.id = :userId
+              )
+            """)
+    List<ShowRow> findCandidates(
+            @Param("genre") CatalogPerformance.Genre genre,
+            @Param("ongoingOnly") boolean ongoingOnly,
+            @Param("today") LocalDate today,
+            @Param("userId") Long userId
+    );
+
+    @Query("SELECT MAX(r.rankedDate) FROM BoxOfficeRank r")
+    LocalDate findLatestRankedDate();
+
+    @Query("""
+            SELECT r.rankNo AS rankNo, p.id AS performanceId, p.title AS title, p.genre AS genre,
+                   p.posterUrl AS posterUrl, d.startDate AS startDate, d.endDate AS endDate
+            FROM BoxOfficeRank r, CatalogPerformance p, ShowDetail d
+            WHERE r.rankedDate = :rankedDate
+              AND p.id = r.performanceId
+              AND d.performanceId = r.performanceId
+              AND (:genre IS NULL OR p.genre = :genre)
+            ORDER BY r.rankNo
+            """)
+    List<RankedRow> findRanked(
+            @Param("rankedDate") LocalDate rankedDate,
+            @Param("genre") CatalogPerformance.Genre genre,
+            Pageable pageable
+    );
+
+    interface ShowRow {
+
+        Long getPerformanceId();
+
+        String getTitle();
+
+        CatalogPerformance.Genre getGenre();
+
+        String getPosterUrl();
+
+        LocalDate getStartDate();
+
+        LocalDate getEndDate();
+    }
+
+    interface RankedRow extends ShowRow {
+
+        Integer getRankNo();
+    }
+}

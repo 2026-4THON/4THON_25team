@@ -91,6 +91,15 @@ public class TasteService {
         return tasteReportRepository.findByUserId(userId).map(TasteReport::getBriefing);
     }
 
+    public List<String> findLifeWorkTitles(Long userId) {
+        List<String> titles = transactionTemplate.execute(status -> tasteReportRepository.findByUserId(userId)
+                .map(report -> report.getLifeWorks().stream()
+                        .map(LifeWork::getTitle)
+                        .toList())
+                .orElse(List.of()));
+        return titles == null ? List.of() : titles;
+    }
+
     public Map<TasteTag, Double> findScores(Long userId) {
         Map<TasteTag, Double> scores = new EnumMap<>(TasteTag.class);
         userTasteScoreRepository.findByUserId(userId)
