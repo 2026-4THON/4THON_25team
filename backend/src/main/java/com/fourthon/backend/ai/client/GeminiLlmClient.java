@@ -23,11 +23,11 @@ public class GeminiLlmClient implements LlmClient {
     private final RestClient restClient;
     private final GeminiProperties geminiProperties;
 
-    public GeminiLlmClient(RestClient.Builder restClientBuilder, GeminiProperties geminiProperties) {
+    public GeminiLlmClient(GeminiProperties geminiProperties) {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(CONNECT_TIMEOUT);
         requestFactory.setReadTimeout(READ_TIMEOUT);
-        this.restClient = restClientBuilder
+        this.restClient = RestClient.builder()
                 .baseUrl(geminiProperties.baseUrl())
                 .requestFactory(requestFactory)
                 .build();
