@@ -1,6 +1,9 @@
 package com.fourthon.backend.internal.config;
 
+import com.fourthon.backend.common.exception.CodedException;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,5 +31,11 @@ public class ValidationAdvice {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .orElse(DEFAULT_MESSAGE);
         return Map.of("message", message);
+    }
+
+    @ExceptionHandler(CodedException.class)
+    public ResponseEntity<Map<String, String>> handleCoded(CodedException exception) {
+        return ResponseEntity.status(exception.getStatus())
+                .body(Map.of("code", exception.getCode(), "message", exception.getMessage()));
     }
 }
