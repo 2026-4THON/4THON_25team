@@ -2,22 +2,26 @@ package com.fourthon.backend.taste.service;
 
 import com.fourthon.backend.common.domain.TagType;
 import com.fourthon.backend.common.domain.TasteTag;
+import com.fourthon.backend.show.service.ShowTagScoreService;
 import com.fourthon.backend.taste.domain.LifeWork;
 import com.fourthon.backend.taste.domain.LifeWorkCategory;
 import com.fourthon.backend.taste.domain.TasteAnalysis;
 import com.fourthon.backend.taste.domain.TasteAnswers;
 import com.fourthon.backend.taste.domain.TasteReport;
+import com.fourthon.backend.taste.domain.TicketRating;
 import com.fourthon.backend.taste.domain.UserTasteScore;
 import com.fourthon.backend.taste.domain.VsChoice;
 import com.fourthon.backend.taste.domain.VsQuestion;
 import com.fourthon.backend.taste.dto.TasteRequest;
 import com.fourthon.backend.taste.dto.TasteResponse;
 import com.fourthon.backend.taste.repository.TasteReportRepository;
+import com.fourthon.backend.taste.repository.TicketRatingRepository;
 import com.fourthon.backend.taste.repository.UserTasteScoreRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +46,9 @@ public class TasteService {
     private final UserTasteScoreRepository userTasteScoreRepository;
     private final TasteAnalyzer tasteAnalyzer;
     private final TasteScoreCalculator tasteScoreCalculator;
+    private final RatingHistoryCalculator ratingHistoryCalculator;
+    private final TicketRatingRepository ticketRatingRepository;
+    private final ShowTagScoreService showTagScoreService;
     private final TransactionTemplate transactionTemplate;
 
     public TasteResponse.Report getReport(Long userId) {
@@ -73,7 +81,9 @@ public class TasteService {
     }
 
     public void recalculateScores(Long userId) {
-        transactionTemplate.executeWithoutResult(status ->
+        TransactionTemplate requiresNew = new TransactionTemplate(transactionTemplate.getTransactionManager());
+        requiresNew.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        requiresNew.executeWithoutResult(status ->
                 tasteReportRepository.findByUserId(userId).ifPresent(this::replaceScores));
     }
 
@@ -94,11 +104,26 @@ public class TasteService {
         Map<TasteTag, Double> scores = tasteScoreCalculator.calculate(
                 report.selectedTagSet(),
                 report.aiScoreMap(),
-                Map.of()
+                ratingHistory(userId)
         );
         userTasteScoreRepository.saveAll(scores.entrySet().stream()
                 .map(entry -> new UserTasteScore(userId, entry.getKey(), entry.getValue()))
                 .toList());
+    }
+
+    private Map<TasteTag, Double> ratingHistory(Long userId) {
+        List<TicketRating> ratings = ticketRatingRepository.findByUserIds(List.of(userId)).stream()
+                .map(row -> TicketRating.ofHalfUnits(row.getUserId(), row.getPerformanceId(), row.getRatingHalfUnits()))
+                .toList();
+        if (ratings.isEmpty()) {
+            return Map.of();
+        }
+        return ratingHistoryCalculator.historyScores(
+                ratings,
+                showTagScoreService.findScores(ratings.stream()
+                        .map(TicketRating::performanceId)
+                        .collect(Collectors.toSet()))
+        );
     }
 
     private TasteReport requireReport(Long userId) {
