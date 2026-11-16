@@ -7,11 +7,14 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ShowTagScoreRepository extends JpaRepository<ShowTagScore, Long> {
 
     List<ShowTagScore> findByPerformanceId(Long performanceId);
+
+    List<ShowTagScore> findByPerformanceIdIn(Collection<Long> performanceIds);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM ShowTagScore s WHERE s.performanceId = :performanceId")
