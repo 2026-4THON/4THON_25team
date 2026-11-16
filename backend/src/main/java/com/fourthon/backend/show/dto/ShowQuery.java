@@ -2,6 +2,7 @@ package com.fourthon.backend.show.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public final class ShowQuery {
 
@@ -14,7 +15,8 @@ public final class ShowQuery {
             String genre,
             String posterUrl,
             LocalDate startDate,
-            LocalDate endDate
+            LocalDate endDate,
+            List<String> keywords
     ) {
     }
 
@@ -22,7 +24,8 @@ public final class ShowQuery {
             Long ticketId,
             Long performanceId,
             String title,
-            LocalDateTime viewedAt
+            LocalDateTime viewedAt,
+            List<String> keywords
     ) {
     }
 }

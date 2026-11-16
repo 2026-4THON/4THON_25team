@@ -55,7 +55,7 @@ public final class MapResponse {
                     show.posterUrl(),
                     show.startDate(),
                     show.endDate(),
-                    List.of()
+                    show.keywords()
             );
         }
     }
@@ -75,7 +75,7 @@ public final class MapResponse {
                     ticket.performanceId(),
                     ticket.title(),
                     ticket.viewedAt(),
-                    List.of()
+                    ticket.keywords()
             );
         }
     }

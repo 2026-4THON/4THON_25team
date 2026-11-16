@@ -81,7 +81,7 @@ public final class ShowResponse {
                     detail.getKopisGenre(),
                     ShowStatus.of(detail.getStartDate(), detail.getEndDate(), today).name(),
                     rating,
-                    List.of(),
+                    List.copyOf(detail.getKeywords()),
                     detail.getSynopsis(),
                     detail.getStartDate(),
                     detail.getEndDate(),
