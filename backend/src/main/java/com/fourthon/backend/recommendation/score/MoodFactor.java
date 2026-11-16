@@ -15,6 +15,9 @@ public class MoodFactor implements ScoreFactor {
 
     @Override
     public double score(RecommendationContext context, ShowQuery.Candidate candidate) {
+        if (context.usesSelection()) {
+            return TasteMatch.selectionMatch(context.selectedTags(), candidate.tagScores(), TagType.MOOD);
+        }
         return TasteMatch.match(context.tasteScores(), candidate.tagScores(), TagType.MOOD);
     }
 }

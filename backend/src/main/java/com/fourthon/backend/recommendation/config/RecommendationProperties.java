@@ -13,8 +13,40 @@ public record RecommendationProperties(
         @DefaultValue Home home,
         @DefaultValue("9") int popularSize,
         @DefaultValue("24") int reasonMaxLength,
-        @DefaultValue Reason reason
+        @DefaultValue Reason reason,
+        @DefaultValue Explore explore
 ) {
+
+    public record Explore(
+            @DefaultValue("4") int size,
+            @DefaultValue("50") int maxLlmCandidates,
+            @DefaultValue("0.3") double minMatch,
+            @DefaultValue("10") int popularityRankCount,
+            @DefaultValue("300") int synopsisMaxLength,
+            @DefaultValue ExploreWeights weights
+    ) {
+    }
+
+    public record ExploreWeights(
+            @DefaultValue("0.35") double genre,
+            @DefaultValue("0.25") double mood,
+            @DefaultValue("0.25") double wish,
+            @DefaultValue("0.10") double rating,
+            @DefaultValue("0.05") double popularity
+    ) {
+
+        public Map<FactorType, Double> toMap(boolean includeWish) {
+            Map<FactorType, Double> weights = new EnumMap<>(FactorType.class);
+            weights.put(FactorType.GENRE, genre);
+            weights.put(FactorType.MOOD, mood);
+            if (includeWish) {
+                weights.put(FactorType.WISH, wish);
+            }
+            weights.put(FactorType.RATING, rating);
+            weights.put(FactorType.POPULARITY, popularity);
+            return weights;
+        }
+    }
 
     public record Reason(
             @DefaultValue("3") int evidenceCount,
