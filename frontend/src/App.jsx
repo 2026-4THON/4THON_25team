@@ -18,6 +18,7 @@ import { isLoggedIn } from "./auth.js";
 function RequireAuth() {
   return isLoggedIn() ? <Outlet /> : <Navigate to="/start" replace />;
 }
+import AnalysisSurvey from "./pages/analysis/survey/AnalysisSurvey.jsx";
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
       </Route>
 
       <Route path="/record/:id" element={<RecordDetail />} />
+      <Route path="/analysis/survey" element={<AnalysisSurvey />} />
     </Routes>
   );
 }

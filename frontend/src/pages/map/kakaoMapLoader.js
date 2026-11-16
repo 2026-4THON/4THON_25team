@@ -1,4 +1,5 @@
 const SDK_URL = "https://dapi.kakao.com/v2/maps/sdk.js";
+const LOAD_TIMEOUT_MS = 10000;
 
 let loadPromise = null;
 
@@ -16,22 +17,45 @@ export const loadKakaoMap = () => {
   }
 
   loadPromise = new Promise((resolve, reject) => {
+    let script = null;
+    let settled = false;
+
+    const done = (kakao) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(kakao);
+    };
+
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      loadPromise = null;
+      script?.remove();
+      reject(new Error("sdk-load-failed"));
+    };
+
+    const timer = setTimeout(fail, LOAD_TIMEOUT_MS);
+
+    const loadMaps = () => {
+      if (typeof window.kakao?.maps?.load !== "function") {
+        fail();
+        return;
+      }
+      window.kakao.maps.load(() => done(window.kakao));
+    };
+
     if (window.kakao && window.kakao.maps) {
-      window.kakao.maps.load(() => resolve(window.kakao));
+      loadMaps();
       return;
     }
 
-    const script = document.createElement("script");
+    script = document.createElement("script");
     script.src = `${SDK_URL}?appkey=${encodeURIComponent(key)}&autoload=false&libraries=services`;
     script.async = true;
-    script.onload = () => {
-      window.kakao.maps.load(() => resolve(window.kakao));
-    };
-    script.onerror = () => {
-      loadPromise = null;
-      script.remove();
-      reject(new Error("지도 SDK를 불러오지 못했습니다."));
-    };
+    script.onload = loadMaps;
+    script.onerror = fail;
     document.head.appendChild(script);
   });
 

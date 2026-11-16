@@ -1,0 +1,158 @@
+$blue: #0078d4;
+$header-blue: #509cd8;
+$chip-border: #a6cff0;
+$gray-light: #aeaeae;
+
+.survey {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #edf4fb;
+
+  &__header {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 140px;
+    background: #fff;
+  }
+
+  &__back {
+    position: absolute;
+    left: 26px;
+    top: 73px;
+    display: flex;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  &__title {
+    position: absolute;
+    left: 50%;
+    top: 69px;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: normal;
+    color: $blue;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+
+  &__line {
+    position: absolute;
+    top: 140px;
+    width: 40px;
+    height: 2px;
+
+    &--1 {
+      left: 87px;
+    }
+
+    &--2 {
+      left: 175px;
+    }
+
+    &--3 {
+      left: 263px;
+    }
+
+    &--on {
+      background: $header-blue;
+    }
+  }
+
+  &__pill {
+    position: absolute;
+    top: 126px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 30px;
+    border: 2px solid #fff;
+    border-radius: 100px;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: normal;
+    color: $gray-light;
+
+    &--1 {
+      left: 39px;
+    }
+
+    &--2 {
+      left: 127px;
+    }
+
+    &--3 {
+      left: 215px;
+    }
+
+    &--4 {
+      left: 303px;
+    }
+
+    &--active {
+      border-color: $header-blue;
+      background: $chip-border;
+      color: #000;
+    }
+  }
+
+  &__divider {
+    position: absolute;
+    left: 26px;
+    top: 190px;
+    width: 338px;
+    height: 1.5px;
+    background: $header-blue;
+  }
+
+  &__body {
+    position: absolute;
+    left: 26px;
+    top: 210px;
+    width: 338px;
+  }
+
+  &__prev,
+  &__next {
+    position: absolute;
+    top: 765px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  &__prev {
+    left: 26px;
+    color: #000;
+    cursor: pointer;
+  }
+
+  &__next {
+    left: 318px;
+    color: $gray-light;
+    cursor: default;
+
+    &--submit {
+      left: auto;
+      right: 26px;
+    }
+
+    &--enabled {
+      color: #000;
+      cursor: pointer;
+    }
+  }
+}

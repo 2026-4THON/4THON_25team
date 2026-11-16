@@ -67,7 +67,7 @@ const findShowTags = (title) => {
   const show = THEATERS.flatMap((theater) => theater.shows).find(
     (item) => venueKey(item.title) === key,
   );
-  return show ? show.tags : [];
+  return Array.isArray(show?.tags) ? show.tags : [];
 };
 
 const readVenues = () => {
@@ -137,8 +137,9 @@ const Map = () => {
       .filter((venue) => venue.name.toLowerCase().includes(query))
       .map((venue) => ({ key: venue.key, name: venue.name, venue }));
   } else if (query) {
+    const nameQuery = normalizeName(query);
     results = NOW_THEATERS.filter((theater) =>
-      normalizeName(theater.name).includes(query),
+      normalizeName(theater.name).includes(nameQuery),
     ).map((theater) => ({ key: theater.id, name: theater.name, theater }));
   }
 
@@ -420,7 +421,7 @@ const Map = () => {
                   </div>
                   <p className="map__show-period">{show.period}</p>
                 </div>
-                {show.tags.length > 0 && (
+                {Array.isArray(show.tags) && show.tags.length > 0 && (
                   <div className="map__show-tags">
                     {show.tags.map((tag) => (
                       <span key={tag} className="map__show-tag">

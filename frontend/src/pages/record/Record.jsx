@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TicketCard from "../../components/record/TicketCard.jsx";
-import { getRecords } from "./recordStore.js";
+import { getRecords, compareRecords } from "./recordStore.js";
 import iconAddTicket from "../../assets/record/icon-add-ticket.svg";
 import "./Record.scss";
 
@@ -10,7 +10,7 @@ const Record = () => {
   const [order, setOrder] = useState("latest");
 
   const sorted = [...getRecords()].sort((a, b) =>
-    order === "latest" ? b.no - a.no : a.no - b.no
+    compareRecords(a, b, order)
   );
 
   return (
