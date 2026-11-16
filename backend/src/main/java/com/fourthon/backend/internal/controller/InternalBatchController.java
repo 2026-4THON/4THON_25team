@@ -2,6 +2,7 @@ package com.fourthon.backend.internal.controller;
 
 import com.fourthon.backend.internal.dto.InternalResponse;
 import com.fourthon.backend.kopis.service.KopisSyncService;
+import com.fourthon.backend.show.service.ShowAnalysisService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class InternalBatchController {
 
     private final KopisSyncService kopisSyncService;
+    private final ShowAnalysisService showAnalysisService;
 
     @Operation(summary = "KOPIS 동기화 수동 실행")
     @PostMapping("/kopis-sync")
@@ -36,5 +38,22 @@ public class InternalBatchController {
         }
         kopisSyncService.runDailyInBackground();
         return new InternalResponse.Started("KOPIS 동기화를 시작했습니다");
+    }
+
+    @Operation(
+            summary = "공연 키워드·태그 점수 분석 수동 실행",
+            description = "아직 분석하지 않은 공연을 진행중·예정 공연부터 한 번에 최대 show-analysis.batch-size개 분석"
+    )
+    @PostMapping("/show-analysis")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public InternalResponse.Started runShowAnalysis() {
+        if (showAnalysisService.isRunning()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "공연 분석이 이미 실행 중입니다"
+            );
+        }
+        showAnalysisService.runInBackground();
+        return new InternalResponse.Started("공연 분석을 시작했습니다");
     }
 }

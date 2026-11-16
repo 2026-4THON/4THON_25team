@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(
@@ -90,6 +91,17 @@ public class ShowDetail {
     @Column(name = "image_url", nullable = false, length = 1000)
     private List<String> introImageUrls = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "show_keywords", joinColumns = @JoinColumn(name = "performance_id"))
+    @OrderColumn(name = "sort_order")
+    @Column(name = "keyword", nullable = false, length = 30)
+    private List<String> keywords = new ArrayList<>();
+
+    private LocalDateTime analyzedAt;
+
+    @Column(nullable = false)
+    private int analysisFailCount;
+
     private LocalDateTime kopisUpdatedAt;
 
     @Column(nullable = false)
@@ -105,7 +117,22 @@ public class ShowDetail {
         apply(command, syncedAt);
     }
 
+    public void completeAnalysis(List<String> newKeywords, LocalDateTime analyzedAt) {
+        keywords.clear();
+        keywords.addAll(newKeywords);
+        this.analyzedAt = analyzedAt;
+        this.analysisFailCount = 0;
+    }
+
+    public void failAnalysis() {
+        analysisFailCount++;
+    }
+
     private void apply(ShowSync.Upsert command, LocalDateTime syncedAt) {
+        if (!Objects.equals(this.synopsis, command.synopsis())) {
+            this.analyzedAt = null;
+            this.analysisFailCount = 0;
+        }
         this.venueId = command.venueId();
         this.kopisGenre = command.kopisGenre();
         this.startDate = command.startDate();
