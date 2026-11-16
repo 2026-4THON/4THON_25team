@@ -38,6 +38,7 @@ public class ShowAnalysisService {
     private final ShowTagScoreRepository showTagScoreRepository;
     private final CatalogPerformanceRepository catalogPerformanceRepository;
     private final ShowAnalyzer showAnalyzer;
+    private final ShowTagScoreService showTagScoreService;
     private final ShowAnalysisProperties showAnalysisProperties;
     private final RequestThrottle showAnalysisThrottle;
     private final TransactionTemplate transactionTemplate;
@@ -137,6 +138,7 @@ public class ShowAnalysisService {
             showDetailRepository.findById(performanceId)
                     .ifPresent(detail -> detail.completeAnalysis(analysis.keywords(), now));
         });
+        showTagScoreService.refreshReviewScores(List.of(performanceId));
     }
 
     @PreDestroy

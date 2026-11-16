@@ -50,4 +50,8 @@ public class ShowTagScore {
         this.synopsisScore = synopsisScore;
         this.score = synopsisScore;
     }
+
+    public void applyReviewScore(double reviewScore, double reviewWeight) {
+        this.score = (1.0 - reviewWeight) * synopsisScore + reviewWeight * reviewScore;
+    }
 }
