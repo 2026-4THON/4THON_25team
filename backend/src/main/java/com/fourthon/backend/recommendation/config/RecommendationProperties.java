@@ -14,8 +14,19 @@ public record RecommendationProperties(
         @DefaultValue("9") int popularSize,
         @DefaultValue("24") int reasonMaxLength,
         @DefaultValue Reason reason,
-        @DefaultValue Explore explore
+        @DefaultValue Explore explore,
+        @DefaultValue Pair pair
 ) {
+
+    public record Pair(
+            @DefaultValue("25") int maxEvidence,
+            @DefaultValue("5") int comboCount,
+            @DefaultValue("5") int reviewsPerCombo,
+            @DefaultValue("3") int topSimilarityCount,
+            @DefaultValue("300") int reviewMaxLength,
+            @DefaultValue("60") int reasonMaxLength
+    ) {
+    }
 
     public record Explore(
             @DefaultValue("4") int size,
