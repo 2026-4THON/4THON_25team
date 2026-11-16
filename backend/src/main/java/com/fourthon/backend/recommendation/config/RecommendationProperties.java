@@ -12,8 +12,17 @@ import java.util.Map;
 public record RecommendationProperties(
         @DefaultValue Home home,
         @DefaultValue("9") int popularSize,
-        @DefaultValue("24") int reasonMaxLength
+        @DefaultValue("24") int reasonMaxLength,
+        @DefaultValue Reason reason
 ) {
+
+    public record Reason(
+            @DefaultValue("3") int evidenceCount,
+            @DefaultValue("300") int evidenceMaxLength,
+            @DefaultValue("40") int maxTargets,
+            @DefaultValue("4000") long requestIntervalMillis
+    ) {
+    }
 
     public record Home(
             @DefaultValue("5") int size,
