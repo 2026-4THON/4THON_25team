@@ -1,5 +1,6 @@
 package com.fourthon.backend.internal.controller;
 
+import com.fourthon.backend.ai.service.ReviewAnalysisService;
 import com.fourthon.backend.internal.dto.InternalResponse;
 import com.fourthon.backend.kopis.service.KopisSyncService;
 import com.fourthon.backend.show.service.ShowAnalysisService;
@@ -25,6 +26,7 @@ public class InternalBatchController {
 
     private final KopisSyncService kopisSyncService;
     private final ShowAnalysisService showAnalysisService;
+    private final ReviewAnalysisService reviewAnalysisService;
 
     @Operation(summary = "KOPIS 동기화 수동 실행")
     @PostMapping("/kopis-sync")
@@ -55,5 +57,22 @@ public class InternalBatchController {
         }
         showAnalysisService.runInBackground();
         return new InternalResponse.Started("공연 분석을 시작했습니다");
+    }
+
+    @Operation(
+            summary = "후기 임베딩·태그 점수 일괄 생성",
+            description = "임베딩이 없거나 다른 모델로 만든 후기를 모두 분석. 3번 실패한 후기는 제외"
+    )
+    @PostMapping("/embeddings")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public InternalResponse.Started runEmbeddings() {
+        if (reviewAnalysisService.isBatchRunning()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "후기 분석이 이미 실행 중입니다"
+            );
+        }
+        reviewAnalysisService.runBatchInBackground();
+        return new InternalResponse.Started("후기 분석을 시작했습니다");
     }
 }
