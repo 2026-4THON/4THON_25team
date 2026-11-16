@@ -7,6 +7,7 @@ import com.fourthon.backend.recommendation.dto.RecommendationRequest;
 import com.fourthon.backend.recommendation.dto.RecommendationResponse;
 import com.fourthon.backend.recommendation.service.ExploreService;
 import com.fourthon.backend.recommendation.service.HomeRecommendationService;
+import com.fourthon.backend.recommendation.service.PairRecommendationService;
 import com.fourthon.backend.recommendation.service.PopularService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +27,7 @@ import java.util.List;
 
 @Tag(
         name = "추천 API",
-        description = "홈 취향 추천, 인기 공연, 탐색 추천"
+        description = "홈 취향 추천, 인기 공연, 탐색 추천, AI 페어 추천"
 )
 @RestController
 @RequestMapping("/api/recommendations")
@@ -35,6 +37,7 @@ public class RecommendationController {
     private final HomeRecommendationService homeRecommendationService;
     private final PopularService popularService;
     private final ExploreService exploreService;
+    private final PairRecommendationService pairRecommendationService;
 
     @Operation(
             summary = "홈 취향 추천",
@@ -67,5 +70,17 @@ public class RecommendationController {
             @Valid @RequestBody RecommendationRequest.Explore request) {
 
         return exploreService.explore(userId, request);
+    }
+
+    @Operation(
+            summary = "AI 페어 추천",
+            description = "내 취향과 이 작품에 쓴 내 후기를 기준으로 다른 사람의 페어 후기에서 배우 조합을 추천. 처음 요청 때 만들고 저장해 재사용"
+    )
+    @GetMapping("/pair/{performanceId}")
+    public RecommendationResponse.Pair pair(
+            @Parameter(hidden = true) @CurrentUser Long userId,
+            @PathVariable Long performanceId) {
+
+        return pairRecommendationService.recommend(userId, performanceId);
     }
 }

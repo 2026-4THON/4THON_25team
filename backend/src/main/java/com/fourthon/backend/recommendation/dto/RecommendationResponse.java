@@ -60,4 +60,21 @@ public final class RecommendationResponse {
             @Schema(description = "희망 날짜 중 회차가 있는 날짜") List<LocalDate> availableDates
     ) {
     }
+
+    @Schema(description = "BE-REC-08 AI 페어 추천")
+    public record Pair(
+            @Schema(description = "RECOMMENDED, INSUFFICIENT_EVIDENCE(근거 부족, 후기가 가장 많은 조합), NO_PAIR_REVIEWS(페어 후기 없음)")
+            String status,
+            @Schema(description = "추천 페어 배우 ID. 후기 목록은 GET /api/shows/{performanceId}/pairs/reviews?actorIds= 로 조회")
+            List<Long> actorIds,
+            List<PairActor> actors,
+            @Schema(description = "추천 이유. 없으면 null") String reason
+    ) {
+    }
+
+    public record PairActor(
+            Long actorId,
+            String name
+    ) {
+    }
 }
