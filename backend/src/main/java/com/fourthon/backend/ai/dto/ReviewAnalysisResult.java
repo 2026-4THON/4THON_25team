@@ -31,4 +31,11 @@ public final class ReviewAnalysisResult {
             boolean stopped
     ) {
     }
+
+    public record Evidence(
+            Long reviewId,
+            String content,
+            double similarity
+    ) {
+    }
 }
