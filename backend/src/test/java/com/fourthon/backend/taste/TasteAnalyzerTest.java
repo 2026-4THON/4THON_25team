@@ -3,11 +3,11 @@ package com.fourthon.backend.taste;
 import com.fourthon.backend.ai.client.AiException;
 import com.fourthon.backend.ai.client.LlmClient;
 import com.fourthon.backend.ai.prompt.PromptLoader;
+import com.fourthon.backend.common.domain.TasteTag;
 import com.fourthon.backend.taste.domain.LifeWork;
 import com.fourthon.backend.taste.domain.LifeWorkCategory;
 import com.fourthon.backend.taste.domain.TasteAnalysis;
 import com.fourthon.backend.taste.domain.TasteAnswers;
-import com.fourthon.backend.taste.domain.TasteTag;
 import com.fourthon.backend.taste.domain.VsChoice;
 import com.fourthon.backend.taste.service.TasteAnalyzer;
 

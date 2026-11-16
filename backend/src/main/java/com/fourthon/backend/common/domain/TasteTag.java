@@ -1,4 +1,4 @@
-package com.fourthon.backend.taste.domain;
+package com.fourthon.backend.common.domain;
 
 import java.util.Arrays;
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package com.fourthon.backend.kopis.config;
 
-import com.fourthon.backend.kopis.client.RequestThrottle;
+import com.fourthon.backend.common.client.RequestThrottle;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

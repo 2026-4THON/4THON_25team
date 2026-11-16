@@ -1,12 +1,12 @@
 package com.fourthon.backend.taste.service;
 
+import com.fourthon.backend.common.domain.TagType;
+import com.fourthon.backend.common.domain.TasteTag;
 import com.fourthon.backend.taste.domain.LifeWork;
 import com.fourthon.backend.taste.domain.LifeWorkCategory;
-import com.fourthon.backend.taste.domain.TagType;
 import com.fourthon.backend.taste.domain.TasteAnalysis;
 import com.fourthon.backend.taste.domain.TasteAnswers;
 import com.fourthon.backend.taste.domain.TasteReport;
-import com.fourthon.backend.taste.domain.TasteTag;
 import com.fourthon.backend.taste.domain.UserTasteScore;
 import com.fourthon.backend.taste.domain.VsChoice;
 import com.fourthon.backend.taste.domain.VsQuestion;

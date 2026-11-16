@@ -1,5 +1,6 @@
 package com.fourthon.backend.kopis.client;
 
+import com.fourthon.backend.common.client.RequestThrottle;
 import com.fourthon.backend.kopis.config.KopisProperties;
 
 import lombok.RequiredArgsConstructor;

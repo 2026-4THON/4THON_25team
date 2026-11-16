@@ -1,5 +1,7 @@
 package com.fourthon.backend.taste.domain;
 
+import com.fourthon.backend.common.domain.TasteTag;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;

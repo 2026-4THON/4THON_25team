@@ -1,4 +1,4 @@
-package com.fourthon.backend.kopis.client;
+package com.fourthon.backend.common.client;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;

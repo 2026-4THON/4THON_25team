@@ -1,5 +1,7 @@
 package com.fourthon.backend.taste.domain;
 
+import com.fourthon.backend.common.domain.TasteTag;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

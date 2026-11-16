@@ -1,6 +1,6 @@
 package com.fourthon.backend.taste.service;
 
-import com.fourthon.backend.taste.domain.TasteTag;
+import com.fourthon.backend.common.domain.TasteTag;
 
 import org.springframework.stereotype.Component;
 

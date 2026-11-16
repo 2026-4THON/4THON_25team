@@ -1,8 +1,8 @@
 package com.fourthon.backend.taste.dto;
 
-import com.fourthon.backend.taste.domain.TagType;
+import com.fourthon.backend.common.domain.TagType;
+import com.fourthon.backend.common.domain.TasteTag;
 import com.fourthon.backend.taste.domain.TasteReport;
-import com.fourthon.backend.taste.domain.TasteTag;
 import com.fourthon.backend.taste.domain.VsChoice;
 
 import io.swagger.v3.oas.annotations.media.Schema;
