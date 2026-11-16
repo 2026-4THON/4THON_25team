@@ -2,6 +2,7 @@ package com.fourthon.backend.internal.controller;
 
 import com.fourthon.backend.ai.service.ReviewAnalysisService;
 import com.fourthon.backend.internal.dto.InternalResponse;
+import com.fourthon.backend.recommendation.service.RecommendationReasonService;
 import com.fourthon.backend.kopis.service.KopisSyncService;
 import com.fourthon.backend.show.service.ShowAnalysisService;
 
@@ -27,6 +28,7 @@ public class InternalBatchController {
     private final KopisSyncService kopisSyncService;
     private final ShowAnalysisService showAnalysisService;
     private final ReviewAnalysisService reviewAnalysisService;
+    private final RecommendationReasonService recommendationReasonService;
 
     @Operation(summary = "KOPIS 동기화 수동 실행")
     @PostMapping("/kopis-sync")
@@ -74,5 +76,22 @@ public class InternalBatchController {
         }
         reviewAnalysisService.runBatchInBackground();
         return new InternalResponse.Started("후기 분석을 시작했습니다");
+    }
+
+    @Operation(
+            summary = "추천 이유 일괄 생성",
+            description = "취향 리포트가 있는 모든 사용자의 홈 추천 중 이유가 없는 조합만 LLM으로 생성"
+    )
+    @PostMapping("/recommendation-reasons")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public InternalResponse.Started runRecommendationReasons() {
+        if (recommendationReasonService.isBatchRunning()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "추천 이유 생성이 이미 실행 중입니다"
+            );
+        }
+        recommendationReasonService.runBatchInBackground();
+        return new InternalResponse.Started("추천 이유 생성을 시작했습니다");
     }
 }
