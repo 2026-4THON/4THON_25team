@@ -29,7 +29,8 @@ class AiReasonGeneratorTest {
             24,
             new RecommendationProperties.Reason(3, 300, 40, 4000),
             new RecommendationProperties.Explore(4, 50, 0.3, 10, 300,
-                    new RecommendationProperties.ExploreWeights(0.35, 0.25, 0.25, 0.10, 0.05))
+                    new RecommendationProperties.ExploreWeights(0.35, 0.25, 0.25, 0.10, 0.05)),
+            new RecommendationProperties.Pair(25, 5, 5, 3, 300, 60)
     );
     private final AiReasonGenerator generator = new AiReasonGenerator(
             llmClient,
