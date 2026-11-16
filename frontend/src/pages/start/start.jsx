@@ -37,7 +37,11 @@ function Start() {
 
           <h1 className="start__title">댕로그</h1>
 
-          <img className="start__ornament" src={ornament} alt="" />
+        <div className="start__ornament">
+            <span className="start__ornament-line start__ornament-line--left" />
+            <img className="start__ornament-center" src={ornament} alt="" />
+            <span className="start__ornament-line start__ornament-line--right" />
+        </div>
 
           <button type="button" className="start__google" onClick={handleGoogle}>
             구글로 시작하기

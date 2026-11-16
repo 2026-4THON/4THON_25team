@@ -88,7 +88,6 @@ $sky: #b0d3f5;
     }
   }
 
-  // 시안에서 로고 큰 원 위쪽(219px)부터 버튼 아래(715px)까지, 496px
   &__content {
     position: relative;
     flex: none;
@@ -97,7 +96,6 @@ $sky: #b0d3f5;
   }
 
   // ---------- 로고 ----------
-  // 바깥 큰 원 (위쪽이 은은하게 빛나요)
   &__ring {
     position: absolute;
     top: 90px;
@@ -198,16 +196,39 @@ $sky: #b0d3f5;
     white-space: nowrap;
   }
 
-  // ---------- 구분 장식 / 버튼 ----------
-  &__ornament {
-    position: absolute;
-    top: 503px;
-    left: 50%;
-    display: block;
-    width: 329.5px;
-    height: 24.5px;
-    transform: translateX(calc(-50% - 3.25px));
-  }
+    &__ornament {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        position: absolute;
+        left: 50%;
+        width: 329.5px;                 
+        height: 24.5px;
+        transform: translateX(-50%);   
+        display: flex;
+        align-items: center;
+        top: 500px;
+        }
+
+        &__ornament-line {
+        flex: 1;
+        height: 2px;
+
+        &--left {
+            background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9));
+        }
+
+        &--right {
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+        }
+        }
+
+&__ornament-center {
+  display: block;
+  flex: none;
+  height: 24.5px;
+  width: auto;
+}
 
   &__google {
     position: absolute;
