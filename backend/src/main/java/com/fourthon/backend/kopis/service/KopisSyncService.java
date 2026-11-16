@@ -11,6 +11,7 @@ import com.fourthon.backend.kopis.repository.KopisExcludedShowRepository;
 import com.fourthon.backend.kopis.repository.SyncStateRepository;
 import com.fourthon.backend.show.dto.ShowSync;
 import com.fourthon.backend.show.service.BoxOfficeService;
+import com.fourthon.backend.show.service.RatingPrior;
 import com.fourthon.backend.show.service.ShowDetailService;
 
 import jakarta.annotation.PreDestroy;
@@ -49,6 +50,7 @@ public class KopisSyncService {
     private final KopisExcludedShowRepository kopisExcludedShowRepository;
     private final ShowDetailService showDetailService;
     private final BoxOfficeService boxOfficeService;
+    private final RatingPrior ratingPrior;
     private final KopisProperties kopisProperties;
     private final TransactionTemplate transactionTemplate;
     private final AtomicBoolean running = new AtomicBoolean(false);
@@ -77,6 +79,7 @@ public class KopisSyncService {
             if (completed) {
                 syncBoxOffice(today.minusDays(1));
             }
+            ratingPrior.refresh();
         } catch (RuntimeException e) {
             log.error("KOPIS 동기화 실패", e);
         } finally {
