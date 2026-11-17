@@ -4,6 +4,7 @@ package com.fourthon.backend.my.service;
 import com.fourthon.backend.my.dto.MySummaryResponse;
 import com.fourthon.backend.my.repository.MyReviewSummaryRepository;
 import com.fourthon.backend.my.repository.MyTicketSummaryRepository;
+import com.fourthon.backend.taste.service.TasteService;
 import com.fourthon.backend.user.entity.User;
 import com.fourthon.backend.user.repository.UserRepository;
 
@@ -20,6 +21,7 @@ public class MySummaryService {
     private final UserRepository userRepository;
     private final MyTicketSummaryRepository ticketRepository;
     private final MyReviewSummaryRepository reviewRepository;
+    private final TasteService tasteService;
 
     @Transactional(readOnly = true)
     public MySummaryResponse getSummary(Long userId) {
@@ -37,11 +39,9 @@ public class MySummaryService {
                 ? ""
                 : user.getName();
 
-        // 2. 티켓 수와 지출 금액 집계
-        var totals = ticketRepository
-                .findTotalsByUserId(userId);
+        // 2. 티켓 수 및 지출 합계
+        var totals = ticketRepository.findTotalsByUserId(userId);
 
-        long ticketCount = value(totals.getTicketCount());
         long ticketTotal = value(totals.getTicketTotal());
         long culturePassTotal =
                 value(totals.getCulturePassTotal());
@@ -50,7 +50,7 @@ public class MySummaryService {
         long totalSpending =
                 ticketTotal - culturePassTotal + mdTotal;
 
-        // 3. 후기 유형별 집계
+        // 3. 후기 유형별 개수
         long performanceCount = 0;
         long actorCount = 0;
         long pairCount = 0;
@@ -73,14 +73,37 @@ public class MySummaryService {
             }
         }
 
-        // 4. 장르별 티켓 개수
-        // TODO: 실제 공연 장르 엔티티 연동
-        // 현재는 임시로 모든 티켓을 기타에 포함
+        // 4. 실제 공연 장르별 티켓 개수
+        long musicalCount = 0;
+        long playCount = 0;
+        long otherCount = 0;
+
+        for (Object[] result :
+                ticketRepository.countTicketsByGenre(userId)) {
+
+            String genre = result[0] == null
+                    ? "ETC"
+                    : result[0].toString();
+
+            long count = ((Number) result[1]).longValue();
+
+            switch (genre) {
+                case "MUSICAL" ->
+                        musicalCount += count;
+
+                case "PLAY" ->
+                        playCount += count;
+
+                default ->
+                        otherCount += count;
+            }
+        }
+
         MySummaryResponse.TicketCounts ticketCounts =
                 new MySummaryResponse.TicketCounts(
-                        0,
-                        0,
-                        ticketCount
+                        musicalCount,
+                        playCount,
+                        otherCount
                 );
 
         // 5. 후기 개수
@@ -100,9 +123,11 @@ public class MySummaryService {
                         totalSpending
                 );
 
-        // 7. 취향 브리핑
-        // 아직 분석 기능을 연결하지 않았으므로 빈 문자열
-        String tasteBriefing = "";
+        // 7. 취향 브리핑 조회
+        // 취향 리포트가 없는 사용자는 빈 문자열 반환
+        String tasteBriefing = tasteService
+                .findBriefing(userId)
+                .orElse("");
 
         return new MySummaryResponse(
                 nickname,

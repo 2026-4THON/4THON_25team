@@ -1,4 +1,3 @@
-
 package com.fourthon.backend.ticket.service;
 
 import com.fourthon.backend.ticket.domain.*;
@@ -6,6 +5,8 @@ import com.fourthon.backend.ticket.dto.*;
 import com.fourthon.backend.ticket.repository.*;
 import com.fourthon.backend.user.entity.User;
 import com.fourthon.backend.user.repository.UserRepository;
+import com.fourthon.backend.show.domain.CatalogPerformanceCast;
+import com.fourthon.backend.show.repository.CatalogPerformanceCastRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,18 +24,18 @@ public class TicketService {
     private final TicketRepository tickets;
     private final UserRepository users;
     private final CatalogService catalog;
-    private final CatalogSessionCastRepository sessionCasts;
+    private final CatalogPerformanceCastRepository performanceCasts;
 
     public TicketService(
             TicketRepository tickets,
             UserRepository users,
             CatalogService catalog,
-            CatalogSessionCastRepository sessionCasts
+            CatalogPerformanceCastRepository performanceCasts
     ) {
         this.tickets = tickets;
         this.users = users;
         this.catalog = catalog;
-        this.sessionCasts = sessionCasts;
+        this.performanceCasts = performanceCasts;
     }
 
     private ResponseStatusException bad(String message) {
@@ -65,10 +66,10 @@ public class TicketService {
                 );
     }
 
-    // 해당 회차의 출연 배우인지 확인
+    // 해당 작품의 전체 출연 배우인지 확인 (회차별 출연진 검증 아님)
     private Map<Long, CatalogActor> validateAndLoadActors(
             TicketRequest req,
-            CatalogSession session
+            CatalogPerformance performance
     ) {
         List<Long> selected = req.castingActorIds();
 
@@ -81,12 +82,10 @@ public class TicketService {
         }
 
         Map<Long, CatalogActor> eligible =
-                sessionCasts
-                        .findBySession_IdOrderByCastOrderAsc(
-                                session.getId()
-                        )
+                performanceCasts
+                        .findCastWithActors(performance.getId())
                         .stream()
-                        .map(CatalogSessionCast::getActor)
+                        .map(CatalogPerformanceCast::getActor)
                         .collect(Collectors.toMap(
                                 CatalogActor::getId,
                                 Function.identity(),
@@ -96,7 +95,7 @@ public class TicketService {
         for (Long actorId : selected) {
             if (!eligible.containsKey(actorId)) {
                 throw bad(
-                        "해당 회차의 캐스팅에 없는 배우입니다: "
+                        "해당 작품의 출연진에 없는 배우입니다: "
                                 + actorId
                 );
             }
@@ -225,7 +224,7 @@ public class TicketService {
                 );
 
         Map<Long, CatalogActor> eligible =
-                validateAndLoadActors(req, session);
+                validateAndLoadActors(req, performance);
 
         Set<Long> selected =
                 new HashSet<>(req.castingActorIds());

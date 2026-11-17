@@ -14,17 +14,39 @@ import java.util.List;
 @RestController @RequestMapping("/api/performances")
 public class CatalogController {
     private final CatalogService catalog;
-    public CatalogController(CatalogService catalog){this.catalog=catalog;}
 
-    @Operation(summary="공연 검색") @GetMapping
-    public List<CatalogResponse.Performance> search(@RequestParam(defaultValue="") String keyword){return catalog.search(keyword);}
+    public CatalogController(CatalogService catalog) {
+        this.catalog = catalog;
+    }
 
-    @Operation(summary="관람 가능한 날짜 조회") @GetMapping("/{id}/dates")
-    public CatalogResponse.Dates dates(@PathVariable Long id){return catalog.dates(id);}
+    @Operation(summary = "공연 검색")
+    @GetMapping
+    public List<CatalogResponse.Performance> search(@RequestParam(defaultValue = "") String keyword) {
+        return catalog.search(keyword);
+    }
 
-    @Operation(summary="날짜별 공연 회차 시간 조회") @GetMapping("/{id}/sessions")
-    public List<CatalogResponse.Session> sessions(@PathVariable Long id,@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate date){return catalog.sessions(id,date);}
+    @Operation(summary = "관람 가능한 날짜 조회")
+    @GetMapping("/{id}/dates")
+    public CatalogResponse.Dates dates(@PathVariable Long id) {
+        return catalog.dates(id);
+    }
 
-    @Operation(summary="공연장·러닝타임·회차 캐스팅 조회") @GetMapping("/{id}/details")
-    public CatalogResponse.Details details(@PathVariable Long id,@RequestParam Long sessionId){return catalog.details(id,sessionId);}
+    @Operation(summary = "날짜별 공연 회차 시간 조회")
+    @GetMapping("/{id}/sessions")
+    public List<CatalogResponse.Session> sessions(@PathVariable Long id, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return catalog.sessions(id, date);
+    }
+
+
+    @Operation(summary = "공연 상세 및 작품 전체 출연진 조회",description = """
+                    선택한 공연의 공연장, 러닝타임 등 상세 정보와
+                    작품 전체 출연진 목록을 반환합니다.
+                    """)
+    @GetMapping("/{id}/details")
+    public CatalogResponse.Details details(
+            @PathVariable Long id,
+            @RequestParam Long sessionId
+    ) {
+        return catalog.details(id, sessionId);
+    }
 }
