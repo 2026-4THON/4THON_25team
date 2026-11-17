@@ -32,6 +32,22 @@ public final class TasteMatch {
         return weightSum == 0.0 ? 0.0 : TagScores.clamp(weighted / weightSum);
     }
 
+    public static double bestMatch(Map<TasteTag, Double> tasteScores, Map<TasteTag, Double> showScores, TagType type) {
+        double topPreference = tagsOf(type)
+                .mapToDouble(tag -> tasteScores.getOrDefault(tag, 0.0))
+                .max()
+                .orElse(0.0);
+        if (topPreference <= 0.0) {
+            return 0.0;
+        }
+        double best = tagsOf(type)
+                .mapToDouble(tag -> tasteScores.getOrDefault(tag, 0.0) / topPreference
+                        * showScores.getOrDefault(tag, 0.0))
+                .max()
+                .orElse(0.0);
+        return TagScores.clamp(best);
+    }
+
     public static double selectionMatch(
             Set<TasteTag> selectedTags,
             Map<TasteTag, Double> showScores,

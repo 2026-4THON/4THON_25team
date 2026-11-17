@@ -18,6 +18,6 @@ public class GenreFactor implements ScoreFactor {
         if (context.usesSelection()) {
             return TasteMatch.selectionMatch(context.selectedTags(), candidate.tagScores(), TagType.GENRE);
         }
-        return TasteMatch.match(context.tasteScores(), candidate.tagScores(), TagType.GENRE);
+        return TasteMatch.bestMatch(context.tasteScores(), candidate.tagScores(), TagType.GENRE);
     }
 }

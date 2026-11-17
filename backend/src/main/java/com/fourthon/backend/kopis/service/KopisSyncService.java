@@ -2,6 +2,7 @@ package com.fourthon.backend.kopis.service;
 
 import com.fourthon.backend.kopis.client.KopisBlockedException;
 import com.fourthon.backend.kopis.client.KopisClient;
+import com.fourthon.backend.kopis.client.KopisException;
 import com.fourthon.backend.kopis.client.KopisResponse;
 import com.fourthon.backend.kopis.config.KopisProperties;
 import com.fourthon.backend.kopis.domain.KopisExcludedShow;
@@ -76,11 +77,9 @@ public class KopisSyncService {
         try {
             LocalDateTime now = LocalDateTime.now(SEOUL);
             LocalDate today = now.toLocalDate();
-            boolean completed = syncShows(now);
+            syncShows(now);
             extendSessions(today);
-            if (completed) {
-                syncBoxOffice(today.minusDays(1));
-            }
+            syncBoxOffice(today.minusDays(1));
             ratingPrior.refresh();
             showAnalysisService.runInBackground();
         } catch (RuntimeException e) {
@@ -90,7 +89,7 @@ public class KopisSyncService {
         }
     }
 
-    private boolean syncShows(LocalDateTime now) {
+    private void syncShows(LocalDateTime now) {
         LocalDate today = now.toLocalDate();
         SyncState state = syncStateRepository.findById(SHOW_SYNC)
                 .orElseGet(() -> new SyncState(SHOW_SYNC));
@@ -123,7 +122,6 @@ public class KopisSyncService {
             state.markSuccess(today);
             syncStateRepository.save(state);
         }
-        return !blocked;
     }
 
     private Set<String> selectTargets(Set<String> kopisIds, boolean firstSync) {
@@ -203,7 +201,13 @@ public class KopisSyncService {
     }
 
     private void syncBoxOffice(LocalDate rankedDate) {
-        List<KopisResponse.BoxOffice> boxOffices = kopisClient.fetchBoxOffice(rankedDate);
+        List<KopisResponse.BoxOffice> boxOffices;
+        try {
+            boxOffices = kopisClient.fetchBoxOffice(rankedDate);
+        } catch (KopisException e) {
+            log.warn("예매 순위 동기화 실패: {}", rankedDate, e);
+            return;
+        }
         Map<String, Long> performanceIds = showDetailService.findPerformanceIds(
                 boxOffices.stream().map(KopisResponse.BoxOffice::kopisId).toList()
         );

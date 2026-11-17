@@ -60,14 +60,41 @@ class RecommendationScoreTest {
     }
 
     @Test
-    void 장르_일치는_내_취향_점수로_가중한_공연_태그_점수_평균이다() {
+    void 장르_일치는_선호도를_반영한_가장_잘_맞는_장르_점수다() {
         Map<TasteTag, Double> mixedTaste = Map.of(TasteTag.ROMANCE, 1.0, TasteTag.HORROR, 0.5);
-        ShowQuery.Candidate show = candidate(1L, Map.of(TasteTag.ROMANCE, 0.9, TasteTag.HORROR, 0.0));
+        ShowQuery.Candidate show = candidate(1L, Map.of(TasteTag.ROMANCE, 0.4, TasteTag.HORROR, 1.0));
         RecommendationContext context = RecommendationContext.forHome(mixedTaste, Map.of(), Map.of());
 
         ScoredShow scored = calculator.score(context, show, weights);
 
-        assertThat(scored.factor(FactorType.GENRE)).isCloseTo(0.6, within(1e-9));
+        assertThat(scored.factor(FactorType.GENRE)).isCloseTo(0.5, within(1e-9));
+    }
+
+    @Test
+    void 선호_장르를_여러_개_골라도_한_장르만_맞는_공연이_기준을_넘는다() {
+        Map<TasteTag, Double> multiTaste = Map.of(
+                TasteTag.DRAMA, 0.9,
+                TasteTag.MUSIC_ART, 0.9,
+                TasteTag.ROMANCE, 0.9
+        );
+        ShowQuery.Candidate musical = candidate(1L, Map.of(TasteTag.MUSIC_ART, 0.5));
+        RecommendationContext context = RecommendationContext.forHome(multiTaste, Map.of(), Map.of());
+
+        ScoredShow scored = calculator.score(context, musical, weights);
+
+        assertThat(scored.factor(FactorType.GENRE)).isCloseTo(0.5, within(1e-9));
+        assertThat(scored.factor(FactorType.GENRE)).isGreaterThanOrEqualTo(properties.home().minMatch());
+    }
+
+    @Test
+    void 선호_장르가_없으면_장르_일치는_0이다() {
+        ShowQuery.Candidate show = candidate(1L, Map.of(TasteTag.ROMANCE, 0.9));
+        RecommendationContext context = RecommendationContext.forHome(
+                Map.of(TasteTag.WARM, 1.0), Map.of(), Map.of());
+
+        ScoredShow scored = calculator.score(context, show, weights);
+
+        assertThat(scored.factor(FactorType.GENRE)).isZero();
     }
 
     @Test

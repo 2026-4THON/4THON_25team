@@ -4,6 +4,7 @@ import com.fourthon.backend.common.client.RequestThrottle;
 import com.fourthon.backend.kopis.config.KopisProperties;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -13,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.net.URI;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,7 +23,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RestKopisClient implements KopisClient {
@@ -32,6 +36,9 @@ public class RestKopisClient implements KopisClient {
     private static final String SEOUL_CODE = "11";
     private static final String YES = "Y";
     private static final String ROW = "db";
+    private static final String BLOCKED_BODY = "Request Blocked";
+    private static final int BAD_REQUEST = 400;
+    private static final int TOO_MANY_REQUESTS = 429;
 
     private final RestClient kopisRestClient;
     private final RequestThrottle kopisThrottle;
@@ -110,18 +117,48 @@ public class RestKopisClient implements KopisClient {
         if (apiKey == null || apiKey.isBlank()) {
             throw new KopisException("KOPIS_API_KEY가 설정되지 않았습니다");
         }
-        kopisThrottle.acquire();
+        List<Duration> retryDelays = kopisProperties.blockedRetryDelays();
+        for (int attempt = 0; ; attempt++) {
+            kopisThrottle.acquire();
+            try {
+                byte[] body = kopisRestClient.get()
+                        .uri(uriBuilder -> buildUri(uriBuilder, path, apiKey, params))
+                        .retrieve()
+                        .body(byte[].class);
+                return KopisXmlReader.parse(body);
+            } catch (RestClientResponseException e) {
+                int status = e.getStatusCode().value();
+                if (!isBlocked(e)) {
+                    throw new KopisException("KOPIS 호출에 실패했습니다: " + path + " (" + status + ")", e);
+                }
+                if (attempt >= retryDelays.size()) {
+                    throw new KopisBlockedException(
+                            "KOPIS가 요청을 거부했습니다: " + path + " (" + status + ")", e);
+                }
+                Duration delay = retryDelays.get(attempt);
+                log.warn("KOPIS가 요청을 잠시 막아 {}초 뒤 다시 요청합니다: {} ({}/{})",
+                        delay.toSeconds(), path, attempt + 1, retryDelays.size());
+                sleep(delay);
+            } catch (RestClientException e) {
+                throw new KopisException("KOPIS 호출에 실패했습니다: " + path, e);
+            }
+        }
+    }
+
+    private boolean isBlocked(RestClientResponseException e) {
+        int status = e.getStatusCode().value();
+        if (status == TOO_MANY_REQUESTS) {
+            return true;
+        }
+        return status == BAD_REQUEST && e.getResponseBodyAsString().contains(BLOCKED_BODY);
+    }
+
+    private void sleep(Duration delay) {
         try {
-            byte[] body = kopisRestClient.get()
-                    .uri(uriBuilder -> buildUri(uriBuilder, path, apiKey, params))
-                    .retrieve()
-                    .body(byte[].class);
-            return KopisXmlReader.parse(body);
-        } catch (RestClientResponseException e) {
-            throw new KopisBlockedException(
-                    "KOPIS가 요청을 거부했습니다: " + path + " (" + e.getStatusCode().value() + ")", e);
-        } catch (RestClientException e) {
-            throw new KopisException("KOPIS 호출에 실패했습니다: " + path, e);
+            TimeUnit.MILLISECONDS.sleep(delay.toMillis());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new KopisException("KOPIS 재요청 대기 중 중단되었습니다", e);
         }
     }
 
