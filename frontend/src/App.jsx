@@ -30,7 +30,7 @@ function App() {
         />
       </Route>
 
-      //네브바 o 
+      {/* 네브바 o */}
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/my" element={<My />} />
@@ -39,7 +39,7 @@ function App() {
         <Route path="/analysis" element={<Analysis />} />
       </Route>
 
-      //네브바 x
+      {/* 네브바 x */}
       <Route element={<Layout nav={false} />}>
         <Route path="/search" element={<Search />} />
         <Route path="/explore" element={<Explore />} />
@@ -47,6 +47,9 @@ function App() {
         <Route path="/detail/:id/actor/:name" element={<ActorReview />} />
       </Route>
 
+      <Route path="/record/new" element={<TicketRegister />} />
+      <Route path="/record/new/complete" element={<RegisterComplete />} />
+      <Route path="/record/:id/edit" element={<TicketRegister mode="edit" />} />
       <Route path="/record/:id" element={<RecordDetail />} />
       <Route path="/analysis/survey" element={<AnalysisSurvey />} />
     </Routes>
