@@ -1,0 +1,523 @@
+$blue: #0078d4;
+$header-blue: #509cd8;
+$chip-bg: #edf4fb;
+$chip-border: #a6cff0;
+$gray: #4d4d4d;
+$divider: #cfe2f3;
+$font: "Paperlogy", sans-serif;
+$font-review: "Inter", sans-serif;
+
+.record-detail {
+  position: relative;
+  width: 390px;
+  min-height: 844px;
+  margin: 0 auto;
+  background: $header-blue;
+  font-family: $font;
+  overflow-x: hidden;
+
+  &__header {
+    position: relative;
+    height: 109px;
+    background: $header-blue;
+  }
+
+  &__back {
+    position: absolute;
+    left: 26px;
+    top: 73px;
+    display: flex;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  &__title {
+    position: absolute;
+    left: 156px;
+    top: 69px;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: normal;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  &__actions {
+    position: absolute;
+    left: 296px;
+    top: 64px;
+    display: flex;
+    gap: 5.829px;
+  }
+
+  &__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  &__tabs {
+    display: flex;
+    height: 39px;
+    margin-top: 22px;
+  }
+
+  &__tab {
+    width: 195px;
+    height: 39px;
+    padding: 0;
+    border: 0;
+    background: $header-blue;
+    font-family: $font;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.75px;
+    color: $chip-border;
+    cursor: pointer;
+
+    &--info {
+      border-top-right-radius: 20px;
+    }
+
+    &--review {
+      border-top-left-radius: 20px;
+    }
+
+    &--active {
+      background: #fff;
+      color: $blue;
+    }
+  }
+
+  &__body {
+    background: #fff;
+  }
+
+  &__section {
+    position: relative;
+    border-top: 1px solid $divider;
+    overflow: hidden;
+
+    &:first-child {
+      border-top: 0;
+    }
+  }
+
+  &__label {
+    font-size: 15px;
+    font-weight: 400;
+    color: $gray;
+  }
+
+  /* 관람정보 탭 */
+  &__section--head {
+    height: 79px;
+  }
+
+  &__genre {
+    position: absolute;
+    left: 26px;
+    top: 13px;
+    padding: 3.3px 11px;
+    border: 1.1px solid $chip-border;
+    border-radius: 110px;
+    background: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    color: $blue;
+    white-space: nowrap;
+  }
+
+  &__name {
+    position: absolute;
+    left: 26px;
+    top: 41px;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: normal;
+    color: #000;
+    white-space: nowrap;
+  }
+
+  &__section--info {
+    height: 140px;
+  }
+
+  &__info-list {
+    position: absolute;
+    left: 26px;
+    top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 179px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #000;
+      white-space: nowrap;
+    }
+
+    li:first-child span + span {
+      margin-left: -5px;
+    }
+  }
+
+  &__section--seat {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    height: 58px;
+    padding: 12px 0 12px 39px;
+    box-sizing: border-box;
+  }
+
+  &__seat,
+  &__companion {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  &__seat {
+    gap: 21px;
+  }
+
+  &__companion {
+    gap: 43px;
+  }
+
+  &__seat-value,
+  &__companion-value {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+    color: #000;
+  }
+
+  &__seat-divider {
+    width: 1px;
+    height: 34px;
+    background: $divider;
+  }
+
+  &__section--cast {
+    height: 138px;
+  }
+
+  &__cast-label {
+    position: absolute;
+    left: 39px;
+    top: 20px;
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__section--cast &__chips {
+    position: absolute;
+    left: 27px;
+    top: 48px;
+    width: 336px;
+  }
+
+  &__chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 63px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50px;
+    background: $chip-bg;
+    font-family: $font;
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
+    white-space: nowrap;
+
+    &--outline {
+      border: 1.5px solid $blue;
+    }
+
+    &--button {
+      cursor: pointer;
+    }
+
+    &--selected {
+      border: 1.5px solid $blue;
+      background: $chip-border;
+    }
+  }
+
+  &__section--expense {
+    height: 187px;
+  }
+
+  &__expense-list {
+    position: absolute;
+    left: 49px;
+    top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 292px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 15px;
+    font-weight: 400;
+    color: $gray;
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      white-space: nowrap;
+    }
+  }
+
+  &__expense-divider {
+    position: absolute;
+    left: 40px;
+    top: 110px;
+    width: 310px;
+    height: 1.5px;
+    background: $blue;
+  }
+
+  &__total {
+    position: absolute;
+    left: 49px;
+    top: 120px;
+    display: flex;
+    justify-content: space-between;
+    width: 292px;
+    font-size: 15px;
+    color: #000;
+
+    span:first-child {
+      font-weight: 400;
+    }
+
+    span:last-child {
+      font-weight: 500;
+    }
+  }
+
+  /* 나의 후기 탭 */
+  &__section--general,
+  &__section--pair,
+  &__section--actor {
+    padding: 20px 26px;
+    box-sizing: border-box;
+  }
+
+  &__section--general {
+    height: 212px;
+  }
+
+  &__section--pair {
+    height: 213px;
+  }
+
+  &__section--actor {
+    height: 273px;
+  }
+
+  &__heading {
+    width: 60px;
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: normal;
+      color: #000;
+      white-space: nowrap;
+    }
+
+    &::after {
+      content: "";
+      display: block;
+      width: 60px;
+      height: 1.5px;
+      margin-top: 4px;
+      background: $blue;
+    }
+  }
+
+  &__heading-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__hint {
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 30px;
+    letter-spacing: 0.5px;
+    color: #aeaeae;
+    white-space: nowrap;
+  }
+
+  &__stars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12.8px;
+    height: 40px;
+    margin-top: 20px;
+    background: $chip-bg;
+  }
+
+  &__heading + &__stars + &__text {
+    margin-top: 14px;
+  }
+
+  &__heading + &__chips,
+  &__heading-row + &__chips {
+    margin-top: 20px;
+  }
+
+  &__chips + &__text {
+    margin-top: 10px;
+  }
+
+  &__text {
+    margin: 0;
+    font-family: $font-review;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    color: #000;
+    white-space: pre-wrap;
+  }
+
+  /* 하단 티켓 구멍 */
+  &__perforation {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: -11px;
+    padding-bottom: 40px;
+  }
+
+  &__hole {
+    width: 22px;
+    height: 22px;
+    border-radius: 100px;
+    background: $header-blue;
+  }
+
+  /* 삭제 모달 */
+  &__overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 390px;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  &__modal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    width: 288px;
+    height: 230px;
+    padding: 0 38.5px;
+    justify-content: center;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  &__modal-icon {
+    margin-bottom: 10px;
+  }
+
+  &__modal-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-align: center;
+    color: #000;
+  }
+
+  &__modal-desc {
+    margin: 5px 0 10px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.24px;
+    text-align: center;
+    color: #aeaeae;
+  }
+
+  &__modal-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+  }
+
+  &__modal-keep,
+  &__modal-delete {
+    box-sizing: border-box;
+    width: 100%;
+    height: 37px;
+    border-radius: 5px;
+    font-family: $font;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.24px;
+    cursor: pointer;
+  }
+
+  &__modal-keep {
+    border: 0;
+    background: $header-blue;
+    color: #f9f4f0;
+  }
+
+  &__modal-delete {
+    border: 2px solid #aeaeae;
+    background: transparent;
+    color: #aeaeae;
+  }
+}
