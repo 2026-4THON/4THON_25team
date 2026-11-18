@@ -3,7 +3,7 @@ FROM eclipse-temurin:21-jdk AS builder
 
 WORKDIR /workspace
 
-COPY . .
+COPY src/main/java/com/fourthon/backend .
 
 RUN chmod +x ./gradlew \
     && ./gradlew --no-daemon bootJar \
