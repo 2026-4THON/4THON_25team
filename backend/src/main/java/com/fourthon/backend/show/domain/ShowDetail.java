@@ -91,6 +91,9 @@ public class ShowDetail {
     @Column(name = "image_url", nullable = false, length = 1000)
     private List<String> introImageUrls = new ArrayList<>();
 
+    @Column(columnDefinition = "TEXT")
+    private String extractedSynopsis;
+
     @ElementCollection
     @CollectionTable(name = "show_keywords", joinColumns = @JoinColumn(name = "performance_id"))
     @OrderColumn(name = "sort_order")
@@ -126,6 +129,24 @@ public class ShowDetail {
 
     public void failAnalysis() {
         analysisFailCount++;
+    }
+
+    public void saveExtractedSynopsis(String newExtractedSynopsis, boolean reanalyze) {
+        this.extractedSynopsis = newExtractedSynopsis;
+        if (reanalyze) {
+            this.analyzedAt = null;
+            this.analysisFailCount = 0;
+        }
+    }
+
+    public String displaySynopsis() {
+        if (synopsis != null && !synopsis.isBlank()) {
+            return synopsis;
+        }
+        if (extractedSynopsis != null && !extractedSynopsis.isBlank()) {
+            return extractedSynopsis;
+        }
+        return null;
     }
 
     private void apply(ShowSync.Upsert command, LocalDateTime syncedAt) {

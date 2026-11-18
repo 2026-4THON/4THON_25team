@@ -82,7 +82,7 @@ public final class ShowResponse {
                     ShowStatus.of(detail.getStartDate(), detail.getEndDate(), today).name(),
                     rating,
                     List.copyOf(detail.getKeywords()),
-                    detail.getSynopsis(),
+                    detail.displaySynopsis(),
                     detail.getStartDate(),
                     detail.getEndDate(),
                     detail.isOpenRun(),

@@ -36,7 +36,8 @@ public interface ShowCandidateRepository extends Repository<ShowDetail, Long> {
 
     @Query("""
             SELECT p.id AS performanceId, p.title AS title, p.genre AS genre, p.posterUrl AS posterUrl,
-                   d.startDate AS startDate, d.endDate AS endDate, d.minPrice AS minPrice, d.synopsis AS synopsis
+                   d.startDate AS startDate, d.endDate AS endDate, d.minPrice AS minPrice,
+                   COALESCE(d.synopsis, d.extractedSynopsis) AS synopsis
             FROM ShowDetail d, CatalogPerformance p
             WHERE p.id = d.performanceId
               AND d.startDate <= :today
