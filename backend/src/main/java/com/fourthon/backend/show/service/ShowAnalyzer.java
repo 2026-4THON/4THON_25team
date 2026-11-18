@@ -1,6 +1,7 @@
 package com.fourthon.backend.show.service;
 
 import com.fourthon.backend.ai.client.AiException;
+import com.fourthon.backend.ai.client.ImageInput;
 import com.fourthon.backend.ai.client.LlmClient;
 import com.fourthon.backend.ai.prompt.PromptLoader;
 import com.fourthon.backend.common.domain.TagScores;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class ShowAnalyzer {
 
     private static final String PROMPT_NAME = "show-analysis";
+    private static final String EXTRACTION_PROMPT_NAME = "show-synopsis-extraction";
     private static final int KEYWORD_COUNT = 3;
     private static final int MAX_KEYWORD_LENGTH = 15;
     private static final double DEFAULT_GENRE_SCORE = 0.5;
@@ -42,17 +45,27 @@ public class ShowAnalyzer {
                 "title", title,
                 "genre", genre,
                 "synopsis", synopsis,
-                "tagList", Arrays.stream(TasteTag.values())
-                        .map(tag -> tag.name() + ": " + tag.getLabel())
-                        .collect(Collectors.joining("\n"))
+                "tagList", tagList()
         )));
-        LlmResult result = read(json);
+        LlmResult result = read(json, LlmResult.class);
         List<String> keywords = toKeywords(result.keywords());
         Map<TasteTag, Double> scores = TagScores.fromCodes(result.scores());
         if (keywords.isEmpty() || scores.values().stream().allMatch(score -> score == 0.0)) {
             throw new AiException("공연 분석 결과가 비어 있습니다");
         }
         return new ShowAnalysis(keywords, scores);
+    }
+
+    public Optional<String> extractSynopsis(String title, String genre, List<ImageInput> images) {
+        String json = llmClient.generateJson(promptLoader.render(EXTRACTION_PROMPT_NAME, Map.of(
+                "title", title,
+                "genre", genre
+        )), images);
+        String synopsis = read(json, ExtractionResult.class).synopsis();
+        if (synopsis == null || synopsis.isBlank()) {
+            return Optional.empty();
+        }
+        return Optional.of(synopsis.strip());
     }
 
     public ShowAnalysis defaultAnalysis(CatalogPerformance.Genre genre) {
@@ -65,9 +78,15 @@ public class ShowAnalyzer {
         return new ShowAnalysis(List.of(), scores);
     }
 
-    private LlmResult read(String json) {
+    private String tagList() {
+        return Arrays.stream(TasteTag.values())
+                .map(tag -> tag.name() + ": " + tag.getLabel())
+                .collect(Collectors.joining("\n"));
+    }
+
+    private <T> T read(String json, Class<T> type) {
         try {
-            return objectMapper.readValue(json, LlmResult.class);
+            return objectMapper.readValue(json, type);
         } catch (JacksonException e) {
             throw new AiException("공연 분석 응답을 읽을 수 없습니다", e);
         }
@@ -89,6 +108,11 @@ public class ShowAnalyzer {
     record LlmResult(
             List<String> keywords,
             Map<String, Double> scores
+    ) {
+    }
+
+    record ExtractionResult(
+            String synopsis
     ) {
     }
 }
