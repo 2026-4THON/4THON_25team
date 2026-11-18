@@ -19,7 +19,6 @@ public class GeminiLlmClient implements LlmClient {
     private static final String API_KEY_HEADER = "x-goog-api-key";
     private static final String JSON_MIME_TYPE = "application/json";
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
-    private static final Duration READ_TIMEOUT = Duration.ofSeconds(60);
 
     private final RestClient restClient;
     private final GeminiProperties geminiProperties;
@@ -27,7 +26,7 @@ public class GeminiLlmClient implements LlmClient {
     public GeminiLlmClient(GeminiProperties geminiProperties) {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(CONNECT_TIMEOUT);
-        requestFactory.setReadTimeout(READ_TIMEOUT);
+        requestFactory.setReadTimeout(Duration.ofSeconds(geminiProperties.readTimeoutSeconds()));
         this.restClient = RestClient.builder()
                 .baseUrl(geminiProperties.baseUrl())
                 .requestFactory(requestFactory)

@@ -14,7 +14,7 @@ public record ShowAnalysisProperties(
         @DefaultValue("20000000") int maxDownloadBytes,
         @DefaultValue("1000") int imageMaxWidth,
         @DefaultValue("1600") int imageSliceHeight,
-        @DefaultValue("16") int maxImageSlices,
+        @DefaultValue("10") int maxImageSlices,
         @DefaultValue("4000") long imageRequestIntervalMillis
 ) {
 }
