@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -41,12 +43,23 @@ public class GeminiLlmClient implements LlmClient {
 
     @Override
     public String generateJson(String prompt) {
+        return generateJson(prompt, List.of());
+    }
+
+    @Override
+    public String generateJson(String prompt, List<ImageInput> images) {
         if (!isConfigured()) {
             throw new AiException("GEMINI_API_KEY가 설정되지 않았습니다");
         }
         String apiKey = geminiProperties.apiKey();
+        List<Map<String, Object>> parts = new ArrayList<>();
+        parts.add(Map.of("text", prompt));
+        images.forEach(image -> parts.add(Map.of("inlineData", Map.of(
+                "mimeType", image.mimeType(),
+                "data", Base64.getEncoder().encodeToString(image.data())
+        ))));
         Map<String, Object> body = Map.of(
-                "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
+                "contents", List.of(Map.of("parts", parts)),
                 "generationConfig", Map.of(
                         "responseMimeType", JSON_MIME_TYPE,
                         "temperature", geminiProperties.temperature()
