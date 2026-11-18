@@ -1,18 +1,12 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+import { useParams } from "react-router-dom";
 
 import "./reviewTab.scss";
+import { fetchShowReviews, likeReview, unlikeReview } from "../../api/reviews.js";
 
 import heartIcon from "../../assets/home/heart.svg";
 import heartFilledIcon from "../../assets/home/heart-filled.svg";
-
-//  임시 데이터
-const REVIEW_TEXT =
-  "A 배우가 해진 특유의 진지하고 예민한 분위기를 살려 대사를 이어가는데, B 배우가 세훈 특유의 순수하고 어딘가 엉뚱한 반응으로 받아치는 장면이 너무 좋았다. 특히 B 배우가 대사 끝에 살짝 덧붙인 애드리브에 A 배우가 순간 웃음을 참는 듯한 표정을 지었는데, 그걸 놓치지 않고 C 배우가 자연스럽게 끼어들면서 이어지는 티키타카가 정말 재미있었다";
-
-const MOCK_REVIEWS = [
-  { id: 1, author: "LikeLion", content: REVIEW_TEXT, date: "2026-05-09", likes: 1, liked: true, mine: true },
-  { id: 2, author: "후기2", content: REVIEW_TEXT, date: "2026-05-09", likes: 1, liked: false, mine: false },
-];
 
 const SORTS = [
   { key: "latest", label: "최신순" },
@@ -20,31 +14,61 @@ const SORTS = [
   { key: "mine", label: "내 리뷰" },
 ];
 
+// 서버 후기 -> 화면용
+const toReview = (r) => ({
+  id: r.reviewId,
+  author: r.authorName,
+  content: r.content,
+  date: r.viewedAt,
+  likes: r.likeCount,
+  liked: r.likedByMe,
+});
+
+// "2026-05-09" -> "26 / 05 / 09"
 const formatDate = (iso) => {
+  if (!iso) return "";
   const [y, m, d] = iso.split("-");
   return `${y.slice(2)} / ${m} / ${d}`;
 };
 
 function ReviewTab() {
+  const { id } = useParams(); // /detail/:id
   const [sort, setSort] = useState("latest");
-  const [reviews, setReviews] = useState(MOCK_REVIEWS);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  const visible = useMemo(() => {
-    const list = sort === "mine" ? reviews.filter((r) => r.mine) : [...reviews];
-    if (sort === "likes") list.sort((a, b) => b.likes - a.likes);
-    if (sort === "latest") list.sort((a, b) => b.date.localeCompare(a.date));
-    return list;
-  }, [reviews, sort]);
+  // 정렬(최신/좋아요/내 리뷰)이 바뀔 때마다 서버에서 다시 조회
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setError(false);
+    const params =
+      sort === "mine"
+        ? { sort: "latest", mineOnly: true, size: 50 }
+        : { sort, size: 50 };
+    fetchShowReviews(id, params)
+      .then((d) => alive && setReviews((d?.content ?? []).map(toReview)))
+      .catch(() => alive && (setReviews([]), setError(true)))
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [id, sort]);
 
-  //  API 연동
-  const toggleLike = (id) =>
-    setReviews((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? { ...r, liked: !r.liked, likes: r.likes + (r.liked ? -1 : 1) }
-          : r
-      )
-    );
+  // 좋아요: 서버 응답(likeCount, likedByMe)을 그대로 반영
+  const toggleLike = useCallback(async (r) => {
+    try {
+      const res = await (r.liked ? unlikeReview(r.id) : likeReview(r.id));
+      setReviews((prev) =>
+        prev.map((x) => (x.id === r.id ? { ...x, likes: res.likeCount, liked: res.likedByMe } : x))
+      );
+    } catch {
+      /* 401(로그인 필요) 등은 일단 무시 */
+    }
+  }, []);
+
+  const visible = reviews;
 
   return (
     <div className="review-tab">
@@ -79,7 +103,7 @@ function ReviewTab() {
               <button
                 type="button"
                 className="review-tab__like"
-                onClick={() => toggleLike(r.id)}
+                onClick={() => toggleLike(r)}
                 aria-pressed={r.liked}
                 aria-label="좋아요"
               >
@@ -90,7 +114,9 @@ function ReviewTab() {
           </li>
         ))}
 
-        {visible.length === 0 && (
+        {loading && <li className="review-tab__empty">불러오는 중...</li>}
+        {!loading && error && <li className="review-tab__empty">후기를 불러오지 못했어요</li>}
+        {!loading && !error && visible.length === 0 && (
           <li className="review-tab__empty">아직 작성된 후기가 없어요</li>
         )}
       </ul>

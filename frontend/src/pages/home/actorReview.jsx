@@ -1,88 +1,80 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import "./actorReview.scss";
+import { fetchActorReviews, likeReview, unlikeReview } from "../../api/reviews.js";
 
 import backIcon from "../../assets/home/back.svg";
-import heartIcon from "../../assets/home/heart.svg";
-import heartFilledIcon from "../../assets/home/heart-filled.svg";
-import playIcon from "../../assets/home/chevron.svg";
-import {
-  fetchShow,
-  fetchActorReviews,
-  likeReview,
-  unlikeReview,
-} from "../../api/reviews.js";
+import heartIcon from "../../assets/home/heart.svg"; 
+import heartFilledIcon from "../../assets/home/heart-filled.svg"; 
 
-const GENRE_LABEL = { MUSICAL: "뮤지컬", PLAY: "연극", ETC: "기타" };
-
-// 탭 -> 서버 파라미터 (정렬/내 후기 필터는 서버에서 처리)
 const SORTS = [
-  { key: "latest", label: "최신순", params: { sort: "latest", mineOnly: false } },
-  { key: "likes", label: "좋아요순", params: { sort: "likes", mineOnly: false } },
-  { key: "mine", label: "내 리뷰", params: { sort: "latest", mineOnly: true } },
+  { key: "latest", label: "최신순" },
+  { key: "likes", label: "좋아요순" },
+  { key: "mine", label: "내 리뷰" },
 ];
+
+// 서버 후기 -> 화면용
+const toReview = (r) => ({
+  id: r.reviewId,
+  author: r.authorName,
+  content: r.content,
+  date: r.viewedAt,
+  likes: r.likeCount,
+  liked: r.likedByMe,
+});
 
 // "2026-05-09" -> "26 / 05 / 09"
 const formatDate = (iso) => {
   if (!iso) return "";
-  const [y, m, d] = iso.slice(0, 10).split("-");
+  const [y, m, d] = iso.split("-");
   return `${y.slice(2)} / ${m} / ${d}`;
 };
 
 function ActorReview() {
   const navigate = useNavigate();
-  const { id, name } = useParams(); // /detail/:id/actor/:name
+  const { name } = useParams(); // /detail/:id/actor/:name
   const actorName = decodeURIComponent(name ?? "");
+  const { state } = useLocation();
+  const work = state?.work ?? { genre: "", title: "" }; // 상세에서 navigate 할 때 넘겨주세요
+  const { id } = useParams();
 
   const [sort, setSort] = useState("latest");
-  const [work, setWork] = useState(null); // { genre, title }
-  const [result, setResult] = useState({ key: null, items: [], error: false });
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  // 작품 정보(헤더)
+  // 정렬(최신/좋아요/내 리뷰)이 바뀔 때마다 서버에서 다시 조회
   useEffect(() => {
-    let cancelled = false;
-    fetchShow(id)
-      .then((s) => !cancelled && setWork({ genre: s.genre, title: s.title }))
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  // 후기 목록: 탭이 바뀔 때마다 서버에서 다시 조회
-  useEffect(() => {
-    let cancelled = false;
-    const key = `${id}|${actorName}|${sort}`;
-    const { params } = SORTS.find((s) => s.key === sort);
+    let alive = true;
+    setLoading(true);
+    setError(false);
+    const params =
+      sort === "mine"
+        ? { sort: "latest", mineOnly: true, size: 50 }
+        : { sort, size: 50 };
     fetchActorReviews(id, actorName, params)
-      .then((page) => !cancelled && setResult({ key, items: page.content ?? [], error: false }))
-      .catch(() => !cancelled && setResult({ key, items: [], error: true }));
+      .then((d) => alive && setReviews((d?.content ?? []).map(toReview)))
+      .catch(() => alive && (setReviews([]), setError(true)))
+      .finally(() => alive && setLoading(false));
     return () => {
-      cancelled = true;
+      alive = false;
     };
-  }, [id, actorName, sort]);
+  }, [id, sort, actorName]);
 
-  const loading = result.key !== `${id}|${actorName}|${sort}`;
-
-  // 좋아요 등록/취소 후 서버가 돌려준 개수와 상태로 갱신
-  const toggleLike = async (review) => {
+  // 좋아요: 서버 응답(likeCount, likedByMe)을 그대로 반영
+  const toggleLike = useCallback(async (r) => {
     try {
-      const res = review.likedByMe
-        ? await unlikeReview(review.reviewId)
-        : await likeReview(review.reviewId);
-      setResult((prev) => ({
-        ...prev,
-        items: prev.items.map((r) =>
-          r.reviewId === res.reviewId
-            ? { ...r, likeCount: res.likeCount, likedByMe: res.likedByMe }
-            : r
-        ),
-      }));
-    } catch (e) {
-      console.error("좋아요 처리 실패", e);
+      const res = await (r.liked ? unlikeReview(r.id) : likeReview(r.id));
+      setReviews((prev) =>
+        prev.map((x) => (x.id === r.id ? { ...x, likes: res.likeCount, liked: res.likedByMe } : x))
+      );
+    } catch {
+      /* 401(로그인 필요) 등은 일단 무시 */
     }
-  };
+  }, []);
+
+  const visible = reviews;
 
   return (
     <div className="actor-review">
@@ -95,22 +87,13 @@ function ActorReview() {
         >
           <img src={backIcon} alt="" />
         </button>
-        <button
-          type="button"
-          className="actor-review__explore"
-          onClick={() => navigate("/explore")}
-        >
-          내 상황에 맞춘 공연 탐색
-          <img src={playIcon} alt="" />
-        </button>
+        <h1 className="actor-review__heading">배우 후기</h1>
       </header>
 
       <section className="actor-review__top">
         <div className="actor-review__work">
-          <span className="actor-review__genre">
-            {work ? GENRE_LABEL[work.genre] ?? work.genre : ""}
-          </span>
-          <span className="actor-review__work-title">{work?.title ?? ""}</span>
+          <span className="actor-review__genre">{work.genre}</span>
+          <span className="actor-review__work-title">{work.title}</span>
         </div>
 
         <div className="actor-review__actor">
@@ -138,33 +121,29 @@ function ActorReview() {
       </div>
 
       <ul className="actor-review__list">
+        {visible.map((r) => (
+          <li className="actor-review__item" key={r.id}>
+            <p className="actor-review__author">{r.author}</p>
+            <p className="actor-review__content">{r.content}</p>
+            <div className="actor-review__foot">
+              <span className="actor-review__date">관람일 {formatDate(r.date)}</span>
+              <button
+                type="button"
+                className="actor-review__like"
+                onClick={() => toggleLike(r)}
+                aria-pressed={r.liked}
+                aria-label="좋아요"
+              >
+                <img src={r.liked ? heartFilledIcon : heartIcon} alt="" />
+                {r.likes}
+              </button>
+            </div>
+          </li>
+        ))}
+
         {loading && <li className="actor-review__empty">불러오는 중...</li>}
-        {!loading && result.error && (
-          <li className="actor-review__empty">후기를 불러오지 못했어요</li>
-        )}
-
-        {!loading &&
-          result.items.map((r) => (
-            <li className="actor-review__item" key={r.reviewId}>
-              <p className="actor-review__author">{r.authorName}</p>
-              <p className="actor-review__content">{r.content}</p>
-              <div className="actor-review__foot">
-                <span className="actor-review__date">관람일 {formatDate(r.viewedAt)}</span>
-                <button
-                  type="button"
-                  className="actor-review__like"
-                  onClick={() => toggleLike(r)}
-                  aria-pressed={r.likedByMe}
-                  aria-label="좋아요"
-                >
-                  <img src={r.likedByMe ? heartFilledIcon : heartIcon} alt="" />
-                  {r.likeCount}
-                </button>
-              </div>
-            </li>
-          ))}
-
-        {!loading && !result.error && result.items.length === 0 && (
+        {!loading && error && <li className="actor-review__empty">후기를 불러오지 못했어요</li>}
+        {!loading && !error && visible.length === 0 && (
           <li className="actor-review__empty">아직 작성된 후기가 없어요</li>
         )}
       </ul>

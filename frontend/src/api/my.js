@@ -1,6 +1,5 @@
-import { get } from "./client.js";
+import { http } from "./http.js";
 
-// { nickname, tasteBriefing, ticketCounts{musical,play,other},
-//   reviewCounts{performance,actor,pair},
-//   expenses{ticketTotal,culturePassTotal,mdTotal,totalSpending} }
-export const fetchMySummary = () => get("/api/my/summary");
+export const fetchMySummary = () => http("/api/my/summary");
+export const fetchAnalysisReport = () => http("/api/analysis/report"); // 없으면 404
+export const postExplore = (body) => http("/api/recommendations/explore", { method: "POST", body });
