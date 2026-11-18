@@ -28,6 +28,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate deployment variables
+        shell: bash
+        run: |
+          test -n "$PROJECT_ID" || { echo "Missing PROJECT_ID"; exit 1; }
+          test -n "$REGION" || { echo "Missing REGION"; exit 1; }
+          test -n "$GAR_REPOSITORY" || { echo "Missing GAR_REPOSITORY"; exit 1; }
+          test -n "$CLOUD_RUN_SERVICE" || { echo "Missing CLOUD_RUN_SERVICE"; exit 1; }
+
       - name: Authenticate Google Cloud
         id: auth
         uses: google-github-actions/auth@v3
@@ -61,9 +69,27 @@ jobs:
           region: ${{ env.REGION }}
           service: ${{ env.CLOUD_RUN_SERVICE }}
           image: ${{ env.IMAGE }}
+
           env_vars: |
             SPRING_PROFILES_ACTIVE=prod
+            DB_USERNAME=danglog_app
+            FRONTEND_URL=http://localhost:5173
+
           env_vars_update_strategy: merge
+
+          secrets: |
+            DB_PASSWORD=DB_PASSWORD:latest
+            GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest
+            GOOGLE_CLIENT_SECRET=GOOGLE_CLIENT_SECRET:latest
+
+          secrets_update_strategy: merge
+
+          flags: >-
+            --service-account=40913066893-compute@developer.gserviceaccount.com
+            --memory=1Gi
+            --min-instances=0
+            --max-instances=2
+            --allow-unauthenticated
 
       - name: Print Service URL
         run: echo "${{ steps.deploy.outputs.url }}"
