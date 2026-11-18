@@ -11,7 +11,10 @@ public record ShowAnalysisProperties(
         @DefaultValue("20") int minSynopsisLength,
         @DefaultValue("200") int extractionBatchSize,
         @DefaultValue("4") int maxIntroImages,
-        @DefaultValue("3000000") int maxImageBytes,
+        @DefaultValue("20000000") int maxDownloadBytes,
+        @DefaultValue("1000") int imageMaxWidth,
+        @DefaultValue("1600") int imageSliceHeight,
+        @DefaultValue("16") int maxImageSlices,
         @DefaultValue("4000") long imageRequestIntervalMillis
 ) {
 }
