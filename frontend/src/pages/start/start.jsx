@@ -1,17 +1,15 @@
 import { useNavigate } from "react-router-dom";
 
 import "./start.scss";
-import { login } from "../../auth.js";
+import { loginWithGoogle } from "../../auth.js";   
 
 import logo from "../../assets/start/logo.svg";
 import ornament from "../../assets/start/ornament.svg"; 
 
 function Start() {
-  const navigate = useNavigate();
 
   const handleGoogle = () => {
-    login();
-    navigate("/", { replace: true });
+        loginWithGoogle();
   };
 
   return (
