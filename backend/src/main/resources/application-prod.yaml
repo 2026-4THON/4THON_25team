@@ -1,0 +1,21 @@
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        secure: true
+        same-site: none
+
+spring:
+  datasource:
+    url: ${DB_URL}
+
+  jpa:
+    show-sql: false
+
+app:
+  frontend-url: ${FRONTEND_URL}
