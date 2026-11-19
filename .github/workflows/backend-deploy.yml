@@ -84,6 +84,7 @@ jobs:
             ADMIN_API_KEY=ADMIN_API_KEY:latest
             KOPIS_API_KEY=KOPIS_API_KEY:latest
             GEMINI_API_KEY=GEMINI_API_KEY:latest
+            YOUTUBE_API_KEY=YOUTUBE_API_KEY:latest
 
           secrets_update_strategy: merge
 
@@ -92,6 +93,7 @@ jobs:
           flags: >-
             --service-account=40913066893-compute@developer.gserviceaccount.com
             --memory=1Gi
+            --scaling=auto
             --min-instances=1
             --max-instances=2
             --allow-unauthenticated

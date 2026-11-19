@@ -6,6 +6,8 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OrderColumn;
@@ -91,6 +93,9 @@ public class ShowDetail {
     @Column(name = "image_url", nullable = false, length = 1000)
     private List<String> introImageUrls = new ArrayList<>();
 
+    @Column(columnDefinition = "TEXT")
+    private String extractedSynopsis;
+
     @ElementCollection
     @CollectionTable(name = "show_keywords", joinColumns = @JoinColumn(name = "performance_id"))
     @OrderColumn(name = "sort_order")
@@ -107,6 +112,18 @@ public class ShowDetail {
     @Column(nullable = false)
     private LocalDateTime syncedAt;
 
+    @ElementCollection
+    @CollectionTable(name = "show_videos", joinColumns = @JoinColumn(name = "performance_id"))
+    @OrderColumn(name = "sort_order")
+    @Column(name = "video_id", nullable = false, length = 20)
+    private List<String> videoIds = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private VideoSearchStatus videoSearchStatus;
+
+    private LocalDateTime videoSearchedAt;
+
     public ShowDetail(ShowSync.Upsert command, LocalDateTime syncedAt) {
         this.performanceId = command.performanceId();
         this.kopisId = command.kopisId();
@@ -115,6 +132,17 @@ public class ShowDetail {
 
     public void update(ShowSync.Upsert command, LocalDateTime syncedAt) {
         apply(command, syncedAt);
+    }
+
+    public void completeVideoSearch(List<String> newVideoIds, LocalDateTime searchedAt) {
+        videoIds.clear();
+        videoIds.addAll(newVideoIds);
+        this.videoSearchStatus = newVideoIds.isEmpty() ? VideoSearchStatus.NONE : VideoSearchStatus.FOUND;
+        this.videoSearchedAt = searchedAt;
+    }
+
+    public enum VideoSearchStatus {
+        FOUND, NONE
     }
 
     public void completeAnalysis(List<String> newKeywords, LocalDateTime analyzedAt) {
@@ -126,6 +154,36 @@ public class ShowDetail {
 
     public void failAnalysis() {
         analysisFailCount++;
+    }
+
+    public void saveExtractedSynopsis(String newExtractedSynopsis, boolean reanalyze) {
+        this.extractedSynopsis = newExtractedSynopsis;
+        if (reanalyze) {
+            this.analyzedAt = null;
+            this.analysisFailCount = 0;
+        }
+    }
+
+    public String displaySynopsis() {
+        return switch (synopsisSource()) {
+            case OFFICIAL -> synopsis;
+            case EXTRACTED -> extractedSynopsis;
+            case NONE -> null;
+        };
+    }
+
+    public SynopsisSource synopsisSource() {
+        if (hasText(synopsis)) {
+            return SynopsisSource.OFFICIAL;
+        }
+        if (hasText(extractedSynopsis)) {
+            return SynopsisSource.EXTRACTED;
+        }
+        return SynopsisSource.NONE;
+    }
+
+    private static boolean hasText(String text) {
+        return text != null && !text.isBlank();
     }
 
     private void apply(ShowSync.Upsert command, LocalDateTime syncedAt) {
@@ -165,5 +223,9 @@ public class ShowDetail {
     private void replaceIntroImages(List<String> newImageUrls) {
         introImageUrls.clear();
         introImageUrls.addAll(newImageUrls);
+    }
+
+    public enum SynopsisSource {
+        OFFICIAL, EXTRACTED, NONE
     }
 }

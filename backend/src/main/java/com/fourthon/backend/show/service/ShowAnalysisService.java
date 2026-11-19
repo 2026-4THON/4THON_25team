@@ -1,7 +1,9 @@
 package com.fourthon.backend.show.service;
 
 import com.fourthon.backend.ai.client.AiUnavailableException;
+import com.fourthon.backend.ai.client.ImageInput;
 import com.fourthon.backend.common.client.RequestThrottle;
+import com.fourthon.backend.show.client.ShowImageClient;
 import com.fourthon.backend.show.config.ShowAnalysisProperties;
 import com.fourthon.backend.show.domain.ShowAnalysis;
 import com.fourthon.backend.show.domain.ShowDetail;
@@ -28,6 +30,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -40,6 +44,7 @@ public class ShowAnalysisService {
     private final ShowTagScoreRepository showTagScoreRepository;
     private final CatalogPerformanceRepository catalogPerformanceRepository;
     private final ShowAnalyzer showAnalyzer;
+    private final ShowImageClient showImageClient;
     private final ShowTagScoreService showTagScoreService;
     private final ShowAnalysisProperties showAnalysisProperties;
     private final RequestThrottle showAnalysisThrottle;
@@ -55,10 +60,15 @@ public class ShowAnalysisService {
     }
 
     public void runInBackground() {
-        runner.execute(this::run);
+        runner.execute(() -> run(this::findExtractionTargets));
     }
 
-    public void run() {
+    public void extractInBackground(List<Long> performanceIds) {
+        List<Long> targets = List.copyOf(performanceIds);
+        runner.execute(() -> run(() -> targets));
+    }
+
+    private void run(Supplier<List<Long>> extractionTargets) {
         if (!running.compareAndSet(false, true)) {
             log.info("공연 분석이 이미 실행 중이라 건너뜀");
             return;
@@ -68,12 +78,72 @@ public class ShowAnalysisService {
                 log.warn("GEMINI_API_KEY가 없어 공연 분석을 건너뜀");
                 return;
             }
-            analyzeTargets();
+            if (extractSynopses(extractionTargets.get())) {
+                analyzeTargets();
+            }
         } catch (RuntimeException e) {
             log.error("공연 분석 실패", e);
         } finally {
             running.set(false);
         }
+    }
+
+    private List<Long> findExtractionTargets() {
+        return showDetailRepository.findExtractionTargets(
+                LocalDate.now(SEOUL),
+                showAnalysisProperties.minSynopsisLength(),
+                showAnalysisProperties.extractionBatchSize()
+        );
+    }
+
+    private boolean extractSynopses(List<Long> targets) {
+        if (targets.isEmpty()) {
+            return true;
+        }
+        log.info("소개 이미지 줄거리 추출 시작: 대상 {}건", targets.size());
+        int extracted = 0;
+        int empty = 0;
+        int failed = 0;
+        for (Long performanceId : targets) {
+            try {
+                if (extractOne(performanceId)) {
+                    extracted++;
+                } else {
+                    empty++;
+                }
+            } catch (AiUnavailableException e) {
+                log.error("Gemini를 지금 쓸 수 없어 줄거리 추출을 중단합니다. 남은 공연은 다음 실행에서 이어서 추출합니다", e);
+                return false;
+            } catch (RuntimeException e) {
+                failed++;
+                log.warn("소개 이미지 줄거리 추출 실패: performanceId={}", performanceId, e);
+            }
+        }
+        log.info("소개 이미지 줄거리 추출 종료: 추출 {}, 내용 없음 {}, 실패 {}", extracted, empty, failed);
+        return true;
+    }
+
+    private boolean extractOne(Long performanceId) {
+        Optional<ShowDetail> detail = showDetailRepository.findById(performanceId);
+        Optional<CatalogPerformance> performance = catalogPerformanceRepository.findById(performanceId);
+        if (detail.isEmpty() || performance.isEmpty()) {
+            return false;
+        }
+        List<ImageInput> images = showImageClient.fetch(showDetailRepository.findIntroImageUrls(performanceId));
+        if (images.isEmpty()) {
+            throw new IllegalStateException("소개 이미지를 하나도 받지 못했습니다");
+        }
+        showAnalysisThrottle.acquire();
+        Optional<String> synopsis = showAnalyzer.extractSynopsis(
+                performance.get().getTitle(),
+                genreName(detail.get(), performance.get()),
+                images
+        );
+        boolean reanalyze = !hasEnoughText(detail.get().getSynopsis());
+        String extracted = synopsis.orElse("");
+        transactionTemplate.executeWithoutResult(status -> showDetailRepository.findById(performanceId)
+                .ifPresent(found -> found.saveExtractedSynopsis(extracted, reanalyze)));
+        return synopsis.isPresent();
     }
 
     private void analyzeTargets() {
@@ -109,8 +179,8 @@ public class ShowAnalysisService {
         if (detail.isEmpty() || performance.isEmpty()) {
             return;
         }
-        String synopsis = detail.get().getSynopsis();
-        if (synopsis == null || synopsis.strip().length() < showAnalysisProperties.minSynopsisLength()) {
+        String synopsis = analysisText(detail.get());
+        if (synopsis == null) {
             save(performanceId, showAnalyzer.defaultAnalysis(performance.get().getGenre()));
             count.defaulted++;
             return;
@@ -123,6 +193,18 @@ public class ShowAnalysisService {
         );
         save(performanceId, analysis);
         count.analyzed++;
+    }
+
+    private String analysisText(ShowDetail detail) {
+        return Stream.of(detail.getSynopsis(), detail.getExtractedSynopsis())
+                .filter(this::hasEnoughText)
+                .map(String::strip)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean hasEnoughText(String text) {
+        return text != null && text.strip().length() >= showAnalysisProperties.minSynopsisLength();
     }
 
     private String genreName(ShowDetail detail, CatalogPerformance performance) {
