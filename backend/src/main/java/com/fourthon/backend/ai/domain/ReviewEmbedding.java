@@ -57,7 +57,7 @@ public class ReviewEmbedding {
     @Column(nullable = false)
     private int dimension;
 
-    @Column(nullable = false, columnDefinition = "BLOB")
+    @Column(name = "`vector`", nullable = false, columnDefinition = "BLOB")
     private byte[] vector;
 
     @Column(nullable = false)
