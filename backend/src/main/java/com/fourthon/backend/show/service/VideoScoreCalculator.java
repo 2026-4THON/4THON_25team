@@ -17,14 +17,16 @@ import java.util.Locale;
 public class VideoScoreCalculator {
 
     private static final int TITLE_MATCH_SCORE = 2;
-    private static final int OFFICIAL_KEYWORD_SCORE = 2;
+    private static final int OFFICIAL_KEYWORD_SCORE = 3;
+    private static final int CURTAIN_CALL_SCORE = 2;
     private static final int RELATED_SCORE = 1;
     private static final int AUDIENCE_KEYWORD_PENALTY = -3;
     private static final int OLD_VIDEO_PENALTY = -2;
     private static final int OLD_VIDEO_YEARS = 1;
     private static final List<String> OFFICIAL_KEYWORDS = List.of(
-            "하이라이트", "프레스콜", "티저", "스팟", "트레일러", "커튼콜", "mv"
+            "하이라이트", "프레스콜", "티저", "스팟", "트레일러", "mv"
     );
+    private static final String CURTAIN_CALL_KEYWORD = "커튼콜";
     private static final List<String> AUDIENCE_KEYWORDS = List.of(
             "리뷰", "후기", "브이로그", "반응", "리액션", "커버"
     );
@@ -52,6 +54,8 @@ public class VideoScoreCalculator {
         int score = TITLE_MATCH_SCORE;
         if (containsAny(title, OFFICIAL_KEYWORDS)) {
             score += OFFICIAL_KEYWORD_SCORE;
+        } else if (title.contains(CURTAIN_CALL_KEYWORD)) {
+            score += CURTAIN_CALL_SCORE;
         }
         if (isRelated(show, candidate, title)) {
             score += RELATED_SCORE;

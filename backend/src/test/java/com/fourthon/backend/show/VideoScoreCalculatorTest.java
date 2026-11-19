@@ -73,10 +73,30 @@ class VideoScoreCalculatorTest {
     @Test
     void 개막보다_1년_넘게_먼저_올라온_영상은_감점한다() {
         List<String> videoIds = videoScoreCalculator.select(show, List.of(
-                candidate("old", "빨래 하이라이트", "공연채널", LocalDate.of(2024, 1, 1))
+                candidate("old", "빨래 커튼콜", "공연채널", LocalDate.of(2024, 1, 1))
         ));
 
         assertThat(videoIds).isEmpty();
+    }
+
+    @Test
+    void 공식_영상을_커튼콜_영상보다_먼저_고른다() {
+        List<String> videoIds = videoScoreCalculator.select(show, List.of(
+                candidate("curtain1", "빨래 커튼콜", "개인채널", RECENT),
+                candidate("curtain2", "빨래 커튼콜 영상", "개인채널", RECENT),
+                candidate("official", "빨래 하이라이트", "공연채널", RECENT)
+        ));
+
+        assertThat(videoIds).containsExactly("official", "curtain1");
+    }
+
+    @Test
+    void 커튼콜_영상도_기준_점수를_넘으면_고른다() {
+        List<String> videoIds = videoScoreCalculator.select(show, List.of(
+                candidate("curtain", "빨래 커튼콜", "개인채널", RECENT)
+        ));
+
+        assertThat(videoIds).containsExactly("curtain");
     }
 
     private VideoCandidate candidate(String videoId, String title, String channelTitle, LocalDate publishedDate) {
