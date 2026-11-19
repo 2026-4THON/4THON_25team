@@ -41,7 +41,7 @@ public class RecommendationController {
 
     @Operation(
             summary = "홈 취향 추천",
-            description = "genre: ALL, MUSICAL, PLAY, ETC / scope: ONGOING(진행중), ALL(예정+진행중+완료). 리포트가 없으면 hasReport=false"
+            description = "genre: ALL, MUSICAL, PLAY, ETC / scope: ONGOING(진행중), ALL(예정+진행중). 리포트가 없으면 hasReport=false"
     )
     @GetMapping("/home")
     public RecommendationResponse.Home home(

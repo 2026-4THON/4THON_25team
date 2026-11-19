@@ -22,7 +22,8 @@ public interface ShowCandidateRepository extends Repository<ShowDetail, Long> {
             WHERE p.id = d.performanceId
               AND d.analyzedAt IS NOT NULL
               AND (:genre IS NULL OR p.genre = :genre)
-              AND (:ongoingOnly = false OR (d.startDate <= :today AND d.endDate >= :today))
+              AND d.endDate >= :today
+              AND (:ongoingOnly = false OR d.startDate <= :today)
               AND d.performanceId NOT IN (
                   SELECT t.performance.id FROM Ticket t WHERE t.user.id = :userId
               )
