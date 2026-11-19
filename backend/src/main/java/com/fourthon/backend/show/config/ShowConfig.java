@@ -16,4 +16,9 @@ public class ShowConfig {
     public RequestThrottle showAnalysisThrottle(ShowAnalysisProperties showAnalysisProperties) {
         return new RequestThrottle(Duration.ofMillis(showAnalysisProperties.requestIntervalMillis()));
     }
+
+    @Bean
+    public RequestThrottle showImageThrottle(ShowAnalysisProperties showAnalysisProperties) {
+        return new RequestThrottle(Duration.ofMillis(showAnalysisProperties.imageRequestIntervalMillis()));
+    }
 }

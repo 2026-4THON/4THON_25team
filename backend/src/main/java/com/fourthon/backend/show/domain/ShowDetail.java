@@ -91,6 +91,9 @@ public class ShowDetail {
     @Column(name = "image_url", nullable = false, length = 1000)
     private List<String> introImageUrls = new ArrayList<>();
 
+    @Column(columnDefinition = "TEXT")
+    private String extractedSynopsis;
+
     @ElementCollection
     @CollectionTable(name = "show_keywords", joinColumns = @JoinColumn(name = "performance_id"))
     @OrderColumn(name = "sort_order")
@@ -126,6 +129,36 @@ public class ShowDetail {
 
     public void failAnalysis() {
         analysisFailCount++;
+    }
+
+    public void saveExtractedSynopsis(String newExtractedSynopsis, boolean reanalyze) {
+        this.extractedSynopsis = newExtractedSynopsis;
+        if (reanalyze) {
+            this.analyzedAt = null;
+            this.analysisFailCount = 0;
+        }
+    }
+
+    public String displaySynopsis() {
+        return switch (synopsisSource()) {
+            case OFFICIAL -> synopsis;
+            case EXTRACTED -> extractedSynopsis;
+            case NONE -> null;
+        };
+    }
+
+    public SynopsisSource synopsisSource() {
+        if (hasText(synopsis)) {
+            return SynopsisSource.OFFICIAL;
+        }
+        if (hasText(extractedSynopsis)) {
+            return SynopsisSource.EXTRACTED;
+        }
+        return SynopsisSource.NONE;
+    }
+
+    private static boolean hasText(String text) {
+        return text != null && !text.isBlank();
     }
 
     private void apply(ShowSync.Upsert command, LocalDateTime syncedAt) {
@@ -165,5 +198,9 @@ public class ShowDetail {
     private void replaceIntroImages(List<String> newImageUrls) {
         introImageUrls.clear();
         introImageUrls.addAll(newImageUrls);
+    }
+
+    public enum SynopsisSource {
+        OFFICIAL, EXTRACTED, NONE
     }
 }

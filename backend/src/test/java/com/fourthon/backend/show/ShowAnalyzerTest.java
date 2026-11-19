@@ -1,6 +1,7 @@
 package com.fourthon.backend.show;
 
 import com.fourthon.backend.ai.client.AiException;
+import com.fourthon.backend.ai.client.ImageInput;
 import com.fourthon.backend.ai.client.LlmClient;
 import com.fourthon.backend.ai.prompt.PromptLoader;
 import com.fourthon.backend.common.domain.TasteTag;
@@ -11,8 +12,12 @@ import com.fourthon.backend.ticket.domain.CatalogPerformance;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.List;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -61,6 +66,26 @@ class ShowAnalyzerTest {
     }
 
     @Test
+    void 소개_이미지에서_뽑은_줄거리를_앞뒤_공백_없이_돌려준다() {
+        given(llmClient.generateJson(anyString(), anyList())).willReturn("""
+                {"synopsis": " 서울살이에 지친 나영과 솔롱고가 빨래를 널며 서로를 위로한다. "}
+                """);
+
+        Optional<String> synopsis = analyzer.extractSynopsis("빨래", "뮤지컬", List.of(image()));
+
+        assertThat(synopsis).contains("서울살이에 지친 나영과 솔롱고가 빨래를 널며 서로를 위로한다.");
+    }
+
+    @Test
+    void 소개_이미지에_작품_내용이_없으면_빈_결과로_본다() {
+        given(llmClient.generateJson(anyString(), anyList())).willReturn("""
+                {"synopsis": ""}
+                """);
+
+        assertThat(analyzer.extractSynopsis("제목", "연극", List.of(image()))).isEmpty();
+    }
+
+    @Test
     void 줄거리가_없으면_장르_기본값을_쓴다() {
         ShowAnalysis play = analyzer.defaultAnalysis(CatalogPerformance.Genre.PLAY);
         ShowAnalysis musical = analyzer.defaultAnalysis(CatalogPerformance.Genre.MUSICAL);
@@ -69,5 +94,9 @@ class ShowAnalyzerTest {
         assertThat(play.tagScores()).containsEntry(TasteTag.DRAMA, 0.5);
         assertThat(musical.tagScores()).containsEntry(TasteTag.MUSIC_ART, 0.5);
         assertThat(musical.tagScores()).containsEntry(TasteTag.DRAMA, 0.0);
+    }
+
+    private ImageInput image() {
+        return new ImageInput("image/png", new byte[]{1, 2, 3});
     }
 }
