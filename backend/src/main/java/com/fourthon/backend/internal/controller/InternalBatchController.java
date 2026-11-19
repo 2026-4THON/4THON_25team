@@ -5,6 +5,7 @@ import com.fourthon.backend.internal.dto.InternalResponse;
 import com.fourthon.backend.recommendation.service.RecommendationReasonService;
 import com.fourthon.backend.kopis.service.KopisSyncService;
 import com.fourthon.backend.show.service.ShowAnalysisService;
+import com.fourthon.backend.show.service.ShowVideoService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +33,7 @@ public class InternalBatchController {
     private final ShowAnalysisService showAnalysisService;
     private final ReviewAnalysisService reviewAnalysisService;
     private final RecommendationReasonService recommendationReasonService;
+    private final ShowVideoService showVideoService;
 
     @Operation(summary = "KOPIS 동기화 수동 실행")
     @PostMapping("/kopis-sync")
@@ -113,5 +115,22 @@ public class InternalBatchController {
         }
         recommendationReasonService.runBatchInBackground();
         return new InternalResponse.Started("추천 이유 생성을 시작했습니다");
+    }
+
+    @Operation(
+            summary = "공연 유튜브 영상 검색 수동 실행",
+            description = "영상을 아직 검색하지 않은 진행중·예정 공연을 진행중 공연부터 한 번에 최대 youtube.daily-limit개 검색"
+    )
+    @PostMapping("/show-video")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public InternalResponse.Started runShowVideo() {
+        if (showVideoService.isRunning()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "공연 영상 검색이 이미 실행 중입니다"
+            );
+        }
+        showVideoService.runInBackground();
+        return new InternalResponse.Started("공연 영상 검색을 시작했습니다");
     }
 }

@@ -23,6 +23,15 @@ public interface ShowDetailRepository extends JpaRepository<ShowDetail, Long> {
     @Query("""
             SELECT d.performanceId
             FROM ShowDetail d
+            WHERE d.videoSearchStatus IS NULL
+              AND d.endDate >= :today
+            ORDER BY CASE WHEN d.startDate <= :today THEN 0 ELSE 1 END, d.startDate
+            """)
+    List<Long> findVideoSearchTargets(@Param("today") LocalDate today, Pageable pageable);
+
+    @Query("""
+            SELECT d.performanceId
+            FROM ShowDetail d
             WHERE d.analyzedAt IS NULL
               AND d.analysisFailCount < :maxFailCount
             ORDER BY CASE WHEN d.endDate >= :today THEN 0 ELSE 1 END, d.startDate DESC

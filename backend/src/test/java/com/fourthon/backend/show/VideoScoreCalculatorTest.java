@@ -17,7 +17,9 @@ class VideoScoreCalculatorTest {
     private static final LocalDate START_DATE = LocalDate.of(2026, 10, 1);
     private static final LocalDate RECENT = LocalDate.of(2026, 9, 1);
 
-    private final VideoScoreCalculator videoScoreCalculator = new VideoScoreCalculator(new YoutubeProperties(2, 3));
+    private final VideoScoreCalculator videoScoreCalculator = new VideoScoreCalculator(
+            new YoutubeProperties(null, "https://www.googleapis.com/youtube/v3", 10, 2, 3, 90, 1000, true)
+    );
     private final ShowVideoQuery show = new ShowVideoQuery("빨래 [대학로]", "학전블루 소극장", List.of("홍길동"), START_DATE);
 
     @Test
