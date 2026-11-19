@@ -7,42 +7,57 @@ $header-bottom: #5b9bd5;
 $line: #8db9ea;
 $line-soft: #b9d3f0;
 
-$font : Paperlogy ;
-
 .my {
+  min-height: 100%;
   padding-bottom: 24px;
   background: $bg;
   font-family: "Paperlogy", sans-serif;
   color: $text;
-  min-height: calc(100% + 100px); 
-  margin-bottom: -100px;        
-  padding-bottom: 124px;         
-  
 
+  // ---------- 헤더 ----------
   &__header {
     position: relative;
     display: flex;
     align-items: flex-end;
     min-height: 128px;
     padding: 0 20px 18px;
-    background: #5b9bd5;
+    background: linear-gradient(180deg, $header-top 0%, $header-bottom 100%);
 
-
+    // 하단에 매달린 티켓 절취선 모양 반원
     &::after {
-        content: "";
-        position: absolute;
-        top: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 334px; 
-        height: 14px;
-        background: radial-gradient(
-            circle at 11px 0,
-            $header-bottom 11px,
-            transparent 11.5px
-          )
-          0 0 / 52px 14px repeat-x; 
-      }
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      height: 14px;
+      background: radial-gradient(
+          circle at 50% 0,
+          $header-bottom 11px,
+          transparent 11.5px
+        )
+        0 0 / 52px 14px repeat-x;
+      background-position: 26px 0;
+    }
+  }
+
+  &__logout {
+    position: absolute;
+    right: 30px;
+    bottom: 20px;
+    width: 70px;
+    height: 29px;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.3);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.28px;
+    color: #4d4d4d;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
 
   &__slogan {
@@ -60,10 +75,9 @@ $font : Paperlogy ;
 
   &__id {
     margin: 0;
-    font-size: 20px;
+    font-size: 28px;
     font-weight: 600;
     color: $blue;
-    font-family: $font;
   }
 
   &__message {
@@ -71,7 +85,7 @@ $font : Paperlogy ;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.4;
-    white-space: pre-line; 
+    white-space: pre-line; // 분석 문구의 \n 줄바꿈 적용
   }
 
   // ---------- 섹션 ----------
@@ -83,7 +97,7 @@ $font : Paperlogy ;
   &__title {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 10px;
     margin: 0 0 12px;
     font-size: 18px;
     font-weight: 500;

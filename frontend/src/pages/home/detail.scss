@@ -2,7 +2,7 @@ $blue: #0078d4;
 $gray: #919191;
 $light-gray: #aeaeae;
 $chip-bg: #edf4fb;
-$line: #cfe3f5;
+$line: #cfe3f5; // 구분선 색 (시안의 선 에셋 색과 다르면 여기만 수정)
 
 .detail {
   min-height: 100%;
@@ -124,11 +124,7 @@ $line: #cfe3f5;
     -webkit-tap-highlight-color: transparent;
 
     &:first-child {
-      border-radius: 0 20px 0 0; 
-    }
-
-    &:last-child {
-      border-radius: 20px 0 0 0;
+      border-radius: 0 20px 0 0;
     }
 
     &--active {
@@ -260,15 +256,18 @@ $line: #cfe3f5;
   // 예매처
   &__tickets {
     display: flex;
-    gap: 5px;
+    flex-wrap: wrap;
+    gap: 8px 5px;
   }
 
   &__ticket {
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    flex: none;
     height: 36px;
     padding: 0 14px;
+    white-space: nowrap;
     border: 1px solid $blue;
     border-radius: 100px;
     background: $chip-bg;
@@ -356,4 +355,9 @@ $line: #cfe3f5;
     font-size: 15px;
     color: $light-gray;
   }
+}
+
+.detail__empty--light {
+  padding: 140px 0 0;
+  color: #fff;
 }

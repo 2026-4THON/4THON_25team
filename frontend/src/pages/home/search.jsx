@@ -28,6 +28,7 @@ function Search() {
   const { state } = useLocation();
   const [query, setQuery] = useState(state?.q ?? "");
   const [results, setResults] = useState([]);
+  const [error, setError] = useState(""); // 요청 실패 시 상태코드 표시(원인 파악용)
   const [recent, setRecent] = useState(loadRecent);
 
   const keyword = query.trim();
@@ -36,16 +37,23 @@ function Search() {
   useEffect(() => {
     if (!keyword) {
       setResults([]);
+      setError("");
       return;
     }
     let alive = true;
     const t = setTimeout(() => {
       searchPerformances(keyword)
-        .then((list) =>
-          alive &&
-          setResults((list ?? []).map((p) => ({ id: p.id, title: p.title, genre: GENRE_LABEL[p.genre] ?? "기타" })))
-        )
-        .catch(() => alive && setResults([]));
+        .then((list) => {
+          if (!alive) return;
+          setError("");
+          setResults((list ?? []).map((p) => ({ id: p.id, title: p.title, genre: GENRE_LABEL[p.genre] ?? "기타" })));
+        })
+        .catch((e) => {
+          if (!alive) return;
+          console.error("[search] 요청 실패", e);
+          setResults([]);
+          setError(String(e.status ?? e.message ?? "error"));
+        });
     }, 300);
     return () => {
       alive = false;
@@ -111,7 +119,8 @@ function Search() {
               </button>
             </li>
           ))}
-          {results.length === 0 && <li className="search__empty">검색 결과가 없어요</li>}
+          {error && <li className="search__empty">검색에 실패했어요 ({error})</li>}
+          {!error && results.length === 0 && <li className="search__empty">검색 결과가 없어요</li>}
         </ul>
       ) : (
         // ---------- 기본: 최근 검색 ----------

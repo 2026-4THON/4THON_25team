@@ -41,8 +41,12 @@ export async function http(path, { method = "GET", params, body } = {}) {
     method,
     headers,
     credentials: "include",
+    redirect: "manual", // 비로그인 시 구글 로그인으로 302 되는 걸 따라가지 않음
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
+
+  // 서버가 로그인 페이지로 리다이렉트 = 로그인 안 된 상태 -> 401 로 취급
+  if (res.type === "opaqueredirect") throw new ApiError(401, { message: "로그인이 필요해요" });
 
   const text = await res.text(); // 빈 응답도 안전하게
   const data = text ? JSON.parse(text) : null;

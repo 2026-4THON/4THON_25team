@@ -8,11 +8,16 @@ export default defineConfig(({ mode }) => {
   const target = env.VITE_PROXY_TARGET || 'http://localhost:8080'
 
   const proxy = {
-    target,
-    changeOrigin: true, // Host 헤더를 백엔드 주소로 바꿔서 전달 (Cloud Run 필수)
-    secure: true,
-    cookieDomainRewrite: 'localhost', // 백엔드가 준 쿠키를 localhost 쿠키로 바꿔 저장
-  }
+  target,
+  changeOrigin: true,
+  secure: true,
+  cookieDomainRewrite: 'localhost',
+  configure: (p) => {
+    p.on('proxyReq', (req) => {
+      if (env.VITE_DEV_COOKIE) req.setHeader('cookie', env.VITE_DEV_COOKIE)
+    })
+  },
+}
 
   return {
     plugins: [react()],

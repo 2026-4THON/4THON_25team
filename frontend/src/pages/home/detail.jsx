@@ -1,42 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import "./detail.scss";
 import PairTab from "./pairTab.jsx";
 import ReviewTab from "./reviewTab.jsx";
+import { fetchShowDetail, secureUrl } from "../../api/showdetail.js";
 
 import backIcon from "../../assets/home/back.svg";
 import starIcon from "../../assets/home/star.svg";
 import linkIcon from "../../assets/home/link.svg";
 import posterImg from "../../assets/home/poster.png";
 
-// 임시 데이터
-const MOCK = {
-  title: "팬레터",
-  genre: "뮤지컬",
-  run: "3연",
-  rating: 4.3,
-  tags: ["#시대극", "#사색적인", "#갈망"],
-  synopsis:
-    "1930년대 일제강점기 경성. 작가 지망생 세훈은 동경하던 소설가 김해진에게 편지를 보내고, 그의 답장을 계기로 문인들의 세계에 발을 들이게 된다.",
-  period: "2026.00.00 ~2026.00.00",
-  venue: "홍익대학교아트센터",
-  age: "8세이상",
-  runtime: "180분",
-  prices: [
-    { seat: "R석", price: 50000 },
-    { seat: "S석", price: 30000 },
-  ],
-  tickets: [
-    { name: "NOL", url: "" },
-    { name: "티켓링크", url: "" },
-  ],
-  actors: [
-    "전동석", "이봄소리", "규현", "박지연", "이지혜",
-    "박은태", "김준수", "유승현", "전동석", "이봄소리",
-  ],
-  videos: [{ youtubeId: "" }, { youtubeId: "" }],
-};
+const GENRE_LABEL = { MUSICAL: "뮤지컬", PLAY: "연극", ETC: "기타" };
+const STATUS_LABEL = { ONGOING: "진행중", UPCOMING: "예정", ENDED: "완료" };
 
 const TABS = [
   { key: "info", label: "작품정보" },
@@ -44,20 +20,80 @@ const TABS = [
   { key: "review", label: "작품후기" },
 ];
 
-const formatWon = (n) => `${n.toLocaleString("ko-KR")}원`;
+const formatWon = (n) => `${Number(n).toLocaleString("ko-KR")}원`;
+const formatDot = (iso) => (iso ? iso.replaceAll("-", ".") : "");
+
+const toView = (d) => ({
+  title: d.title,
+  genre: GENRE_LABEL[d.genre] ?? d.kopisGenre ?? "",
+  status: STATUS_LABEL[d.status] ?? "",
+  rating: d.rating?.average != null ? Number(d.rating.average).toFixed(1) : "-",
+  tags: (d.keywords ?? [])
+    .map((k) => (typeof k === "string" ? k : k?.keyword ?? k?.name ?? ""))
+    .filter(Boolean)
+    .map((k) => (k.startsWith("#") ? k : `#${k}`)),
+  synopsis: d.synopsis ?? "",
+  period: d.startDate
+    ? `${formatDot(d.startDate)} ~ ${d.openRun && !d.endDate ? "" : formatDot(d.endDate)}`.trim()
+    : "",
+  venue: d.venue?.name ?? "",
+  age: d.ageText ?? "",
+  runtime: d.runtimeText ?? (d.runningMinutes ? `${d.runningMinutes}분` : ""),
+  prices: (d.prices ?? []).map((p) => ({ seat: p.grade, price: p.price })),
+  tickets: (d.bookingLinks ?? []).map((b) => ({ name: b.name, url: b.url })),
+  actors: (d.cast ?? []).map((a) => ({ id: a.actorId, name: a.name })),
+  videos: (d.videoIds ?? []).slice(0, 2),
+  poster: secureUrl(d.posterUrl) || posterImg,
+});
 
 function Detail() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("info");
-  const [open, setOpen] = useState(false); 
   const { id } = useParams();
+  const [tab, setTab] = useState("info");
+  const [open, setOpen] = useState(false);
+  const [state, setState] = useState({ loading: true, error: "", data: null });
 
-  const d = MOCK;
+  useEffect(() => {
+    let alive = true;
+    setState({ loading: true, error: "", data: null });
+    setTab("info");
+    fetchShowDetail(id)
+      .then((d) => alive && setState({ loading: false, error: "", data: toView(d) }))
+      .catch((e) => {
+        console.error("[detail] 요청 실패", e);
+        if (alive) setState({ loading: false, error: String(e.status ?? "error"), data: null });
+      });
+    return () => {
+      alive = false;
+    };
+  }, [id]);
+
+  const d = state.data;
+
+  if (state.loading || !d) {
+    return (
+      <div className="detail">
+        <button
+          type="button"
+          className="detail__back"
+          onClick={() => navigate(-1)}
+          aria-label="뒤로가기"
+        >
+          <img src={backIcon} alt="" />
+        </button>
+        <p className="detail__empty detail__empty--light">
+          {state.loading ? "불러오는 중..." : `작품 정보를 불러오지 못했어요 (${state.error})`}
+        </p>
+      </div>
+    );
+  }
+
+  const videoSlots = [0, 1].map((i) => d.videos[i] ?? "");
 
   return (
     <div className="detail">
       <header className="detail__hero">
-        <img className="detail__poster" src={posterImg} alt={`${d.title} 포스터`} />
+        <img className="detail__poster" src={d.poster} alt={`${d.title} 포스터`} />
         <div className="detail__shade" />
 
         <button
@@ -72,8 +108,8 @@ function Detail() {
         <div className="detail__info">
           <h1 className="detail__title">{d.title}</h1>
           <div className="detail__meta">
-            <span className="detail__pill">{d.genre}</span>
-            <span className="detail__pill">{d.run}</span>
+            {d.genre && <span className="detail__pill">{d.genre}</span>}
+            {d.status && <span className="detail__pill">{d.status}</span>}
             <span className="detail__pill">
               <img src={starIcon} alt="" />
               {d.rating}
@@ -98,26 +134,30 @@ function Detail() {
       <div className="detail__body">
         {tab === "info" && (
           <>
-            <section className="detail__tags">
-              {d.tags.map((t) => (
-                <span className="detail__tag" key={t}>
-                  {t}
-                </span>
-              ))}
-            </section>
+            {d.tags.length > 0 && (
+              <section className="detail__tags">
+                {d.tags.map((t) => (
+                  <span className="detail__tag" key={t}>
+                    {t}
+                  </span>
+                ))}
+              </section>
+            )}
 
             <section className="detail__section">
               <h2 className="detail__label">시놉시스</h2>
-              <p className={open ? "detail__synopsis detail__synopsis--open" : "detail__synopsis"}>
-                {d.synopsis}
-              </p>
-              <button
-                type="button"
-                className="detail__more"
-                onClick={() => setOpen((v) => !v)}
-              >
-                {open ? "접기" : "더보기"}
-              </button>
+              {d.synopsis ? (
+                <>
+                  <p className={open ? "detail__synopsis detail__synopsis--open" : "detail__synopsis"}>
+                    {d.synopsis}
+                  </p>
+                  <button type="button" className="detail__more" onClick={() => setOpen((v) => !v)}>
+                    {open ? "접기" : "더보기"}
+                  </button>
+                </>
+              ) : (
+                <p className="detail__synopsis">등록된 시놉시스가 없어요</p>
+              )}
             </section>
 
             <section className="detail__section detail__grid">
@@ -175,12 +215,16 @@ function Detail() {
                 <span className="detail__hint">프로필을 눌러 배우별 후기를 확인하세요</span>
               </div>
               <div className="detail__actors">
-                {d.actors.map((name, i) => (
+                {d.actors.map(({ id: actorId, name }) => (
                   <button
-                    key={`${name}-${i}`}
+                    key={actorId}
                     type="button"
                     className="detail__actor"
-                    onClick={() => navigate(`/detail/${id}/actor/${encodeURIComponent(name)}`)}
+                    onClick={() =>
+                      navigate(`/detail/${id}/actor/${encodeURIComponent(name)}`, {
+                        state: { work: { genre: d.genre, title: d.title } },
+                      })
+                    }
                   >
                     {name}
                   </button>
@@ -191,7 +235,7 @@ function Detail() {
             <section className="detail__section detail__section--video">
               <h2 className="detail__label">박제 영상</h2>
               <div className="detail__videos">
-                {d.videos.map(({ youtubeId }, i) =>
+                {videoSlots.map((youtubeId, i) =>
                   youtubeId ? (
                     <iframe
                       key={youtubeId}
@@ -210,8 +254,9 @@ function Detail() {
             </section>
           </>
         )}
-            {tab === "pair" && <PairTab />}
-            {tab === "review" && <ReviewTab />}
+
+        {tab === "pair" && <PairTab actors={d.actors} />}
+        {tab === "review" && <ReviewTab />}
       </div>
     </div>
   );
