@@ -83,15 +83,21 @@ jobs:
             GOOGLE_CLIENT_SECRET=GOOGLE_CLIENT_SECRET:latest
             ADMIN_API_KEY=ADMIN_API_KEY:latest
             KOPIS_API_KEY=KOPIS_API_KEY:latest
+            GEMINI_API_KEY=GEMINI_API_KEY:latest
 
           secrets_update_strategy: merge
+
+
 
           flags: >-
             --service-account=40913066893-compute@developer.gserviceaccount.com
             --memory=1Gi
-            --min-instances=0
+            --min-instances=1
             --max-instances=2
             --allow-unauthenticated
+            --no-cpu-throttling
+      
+      
 
       - name: Print Service URL
         run: echo "${{ steps.deploy.outputs.url }}"
