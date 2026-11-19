@@ -99,7 +99,7 @@ public final class ShowResponse {
                             .toList(),
                     cast,
                     List.copyOf(detail.getIntroImageUrls()),
-                    List.of()
+                    List.copyOf(detail.getVideoIds())
             );
         }
     }
