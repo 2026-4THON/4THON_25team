@@ -228,8 +228,25 @@ $line: #cfe3f5; // 구분선 색 (시안의 선 에셋 색과 다르면 여기�
   // 공연 정보 (2열)
   &__grid {
     display: grid;
-    grid-template-columns: 240px 1fr; // 오른쪽 열이 x=266에서 시작
+    grid-template-columns: 240px minmax(0, 1fr); // 오른쪽 열이 x=266에서 시작
     row-gap: 15px;
+
+    > div {
+      min-width: 0;
+    }
+
+    .detail__value {
+      white-space: normal;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+    }
+
+    .detail__venue-part {
+      display: inline-block;
+      max-width: 100%;
+      white-space: normal;
+      vertical-align: top;
+    }
   }
 
   // 가격

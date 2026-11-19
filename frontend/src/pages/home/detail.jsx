@@ -171,7 +171,13 @@ function Detail() {
               </div>
               <div>
                 <h2 className="detail__label">공연장</h2>
-                <p className="detail__value">{d.venue}</p>
+                <p className="detail__value">
+                  {d.venue.replace(/\)\s*\(/g, ")\n(").split("\n").map((part, i) => (
+                    <span key={i} className="detail__venue-part">
+                      {part}{" "}
+                    </span>
+                  ))}
+                </p>
               </div>
               <div>
                 <h2 className="detail__label">러닝타임</h2>
