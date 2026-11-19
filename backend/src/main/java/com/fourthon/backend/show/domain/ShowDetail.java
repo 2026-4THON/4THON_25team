@@ -140,13 +140,25 @@ public class ShowDetail {
     }
 
     public String displaySynopsis() {
-        if (synopsis != null && !synopsis.isBlank()) {
-            return synopsis;
+        return switch (synopsisSource()) {
+            case OFFICIAL -> synopsis;
+            case EXTRACTED -> extractedSynopsis;
+            case NONE -> null;
+        };
+    }
+
+    public SynopsisSource synopsisSource() {
+        if (hasText(synopsis)) {
+            return SynopsisSource.OFFICIAL;
         }
-        if (extractedSynopsis != null && !extractedSynopsis.isBlank()) {
-            return extractedSynopsis;
+        if (hasText(extractedSynopsis)) {
+            return SynopsisSource.EXTRACTED;
         }
-        return null;
+        return SynopsisSource.NONE;
+    }
+
+    private static boolean hasText(String text) {
+        return text != null && !text.isBlank();
     }
 
     private void apply(ShowSync.Upsert command, LocalDateTime syncedAt) {
@@ -186,5 +198,9 @@ public class ShowDetail {
     private void replaceIntroImages(List<String> newImageUrls) {
         introImageUrls.clear();
         introImageUrls.addAll(newImageUrls);
+    }
+
+    public enum SynopsisSource {
+        OFFICIAL, EXTRACTED, NONE
     }
 }
