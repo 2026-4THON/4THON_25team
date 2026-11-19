@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import java.time.Duration;
 
 @Configuration
-@EnableConfigurationProperties({RatingProperties.class, ShowAnalysisProperties.class})
+@EnableConfigurationProperties({RatingProperties.class, ShowAnalysisProperties.class, YoutubeProperties.class})
 public class ShowConfig {
 
     @Bean
