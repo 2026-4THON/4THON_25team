@@ -1,5 +1,6 @@
 package com.fourthon.backend.show.service;
 
+import com.fourthon.backend.common.exception.CodedException;
 import com.fourthon.backend.show.dto.ShowResponse;
 import com.fourthon.backend.show.repository.CatalogPerformanceCastRepository;
 import com.fourthon.backend.show.repository.ShowDetailRepository;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -33,8 +33,9 @@ public class ShowService {
 
     public ShowResponse.Detail getDetail(Long performanceId) {
         CatalogPerformance performance = catalogPerformanceRepository.findById(performanceId)
-                .orElseThrow(() -> new ResponseStatusException(
+                .orElseThrow(() -> new CodedException(
                         HttpStatus.NOT_FOUND,
+                        "SHOW_NOT_FOUND",
                         "공연을 찾을 수 없습니다"
                 ));
         List<ShowResponse.Actor> cast = catalogPerformanceCastRepository.findCastWithActors(performanceId).stream()

@@ -2,6 +2,7 @@ package com.fourthon.backend.internal.controller;
 
 import com.fourthon.backend.ai.dto.ReviewAnalysisResult;
 import com.fourthon.backend.ai.service.ReviewAnalysisService;
+import com.fourthon.backend.common.exception.CodedException;
 import com.fourthon.backend.internal.dto.InternalResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -42,8 +42,9 @@ public class InternalEmbeddingController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public InternalResponse.Started retry() {
         if (reviewAnalysisService.isBatchRunning()) {
-            throw new ResponseStatusException(
+            throw new CodedException(
                     HttpStatus.CONFLICT,
+                    "BATCH_ALREADY_RUNNING",
                     "후기 분석이 이미 실행 중입니다"
             );
         }
