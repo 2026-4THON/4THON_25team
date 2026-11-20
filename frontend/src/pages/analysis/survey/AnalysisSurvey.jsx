@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StepTaste from "./StepTaste.jsx";
 import StepFavorites from "./StepFavorites.jsx";
@@ -6,11 +6,18 @@ import StepVs from "./StepVs.jsx";
 import StepFree from "./StepFree.jsx";
 import LeaveModal from "./LeaveModal.jsx";
 import { VS_GROUPS } from "../analysisData.js";
-import { getTaste, saveTaste, buildMockSummary } from "../analysisStore.js";
+import { ApiError } from "../../../api/client.js";
+import {
+  fetchReport,
+  createReport,
+  updateReport,
+} from "../../../api/analysis.js";
+import { toTaste, toRequest } from "../analysisApi.js";
 import "./AnalysisSurvey.scss";
 
 const STEPS = [1, 2, 3, 4];
 const LAST_STEP = 4;
+const SUBMIT_ERROR = "분석하지 못했어요";
 
 const toggleItem = (list, item) =>
   list.includes(item) ? list.filter((v) => v !== item) : [...list, item];
@@ -18,44 +25,52 @@ const toggleItem = (list, item) =>
 const isFilled = (favorite) =>
   Boolean(favorite.category && favorite.title.trim());
 
-const isPlainObject = (value) =>
-  Boolean(value) && typeof value === "object" && !Array.isArray(value);
-
-const toStringList = (value) =>
-  Array.isArray(value) ? value.filter((v) => typeof v === "string") : [];
-
-// 분석 완료된 저장값이 있으면 수정용 초기값으로 쓴다. 없으면 빈 값.
-const loadInitial = () => {
-  const saved = getTaste();
-  const done = isPlainObject(saved) && saved.done === true;
-  const now = Date.now();
-  return {
-    genres: done ? toStringList(saved.genres) : [],
-    moods: done ? toStringList(saved.moods) : [],
-    favorites:
-      done && Array.isArray(saved.favorites)
-        ? saved.favorites.filter(isPlainObject).map((f, i) => ({
-            id: `${now}-init-${i + 1}`,
-            category: typeof f.category === "string" ? f.category : "",
-            title: typeof f.title === "string" ? f.title : "",
-          }))
-        : [],
-    vs: done && isPlainObject(saved.vs) ? saved.vs : {},
-    freeText: done && typeof saved.freeText === "string" ? saved.freeText : "",
-  };
-};
-
 const AnalysisSurvey = () => {
   const navigate = useNavigate();
-  const [initial] = useState(loadInitial);
+  const [loading, setLoading] = useState(true);
+  const [hasReport, setHasReport] = useState(false);
   const [step, setStep] = useState(1);
-  const [genres, setGenres] = useState(initial.genres);
-  const [moods, setMoods] = useState(initial.moods);
-  const [favorites, setFavorites] = useState(initial.favorites);
-  const [vs, setVs] = useState(initial.vs);
-  const [freeText, setFreeText] = useState(initial.freeText);
+  const [genres, setGenres] = useState([]);
+  const [moods, setMoods] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [vs, setVs] = useState({});
+  const [freeText, setFreeText] = useState("");
   const [leaveOpen, setLeaveOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const seqRef = useRef(0);
+  const submittingRef = useRef(false);
+
+  // 기존 리포트가 있으면 수정용 초기값으로 쓴다. 없으면(404 등) 빈 값.
+  useEffect(() => {
+    let cancelled = false;
+    fetchReport()
+      .then((report) => {
+        if (cancelled) return;
+        const taste = toTaste(report);
+        const now = Date.now();
+        setGenres(taste.genres);
+        setMoods(taste.moods);
+        setFavorites(
+          taste.favorites.map((f, i) => ({
+            id: `${now}-init-${i + 1}`,
+            category: f.category ?? "",
+            title: f.title ?? "",
+          })),
+        );
+        setVs(taste.vs);
+        setFreeText(taste.freeText);
+        setHasReport(true);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const createId = () => {
     seqRef.current += 1;
@@ -72,28 +87,44 @@ const AnalysisSurvey = () => {
       group.pairs.every((_, i) => Boolean(vs[`${group.id}-${i}`])),
     );
   } else if (step === LAST_STEP) {
-    canNext = freeText.trim() !== "";
+    canNext = freeText.trim() !== "" && !submitting;
   }
 
   const handlePrev = () => {
-    if (step <= 1) return;
+    if (step <= 1 || submitting) return;
     setStep((prev) => prev - 1);
   };
 
-  const handleSubmit = () => {
-    saveTaste({
-      done: true,
-      summary: buildMockSummary({ genres, moods }),
-      genres,
-      moods,
-      favorites: favorites
-        .filter(isFilled)
-        .map((f) => ({ category: f.category, title: f.title.trim() })),
-      vs,
-      freeText: freeText.trim(),
-      updatedAt: new Date().toISOString(),
-    });
-    navigate("/analysis");
+  const saveReport = async (body) => {
+    if (hasReport) return updateReport(body);
+    try {
+      return await createReport(body);
+    } catch (err) {
+      // 이미 리포트가 있으면(409) 수정으로 한 번 더 시도한다.
+      if (err instanceof ApiError && err.status === 409) {
+        return updateReport(body);
+      }
+      throw err;
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setSubmitting(true);
+    setError("");
+    try {
+      await saveReport(
+        toRequest({ genres, moods, favorites, vs, freeText }),
+      );
+      navigate("/analysis", { replace: true });
+    } catch (err) {
+      setError(
+        err instanceof ApiError && err.message ? err.message : SUBMIT_ERROR,
+      );
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
   };
 
   const handleNext = () => {
@@ -144,44 +175,52 @@ const AnalysisSurvey = () => {
 
       <span className="survey__divider" />
 
-      <div className="survey__body">
-        {step === 1 && (
-          <StepTaste
-            genres={genres}
-            moods={moods}
-            onToggleGenre={(genre) => setGenres((prev) => toggleItem(prev, genre))}
-            onToggleMood={(mood) => setMoods((prev) => toggleItem(prev, mood))}
-          />
-        )}
-        {step === 2 && (
-          <StepFavorites
-            favorites={favorites}
-            onChange={setFavorites}
-            createId={createId}
-          />
-        )}
-        {step === 3 && (
-          <StepVs
-            vs={vs}
-            onPick={(key, text) => setVs((prev) => ({ ...prev, [key]: text }))}
-          />
-        )}
-        {step === 4 && <StepFree value={freeText} onChange={setFreeText} />}
-      </div>
+      {loading ? (
+        <p className="survey__status">불러오는 중</p>
+      ) : (
+        <>
+          <div className="survey__body">
+            {step === 1 && (
+              <StepTaste
+                genres={genres}
+                moods={moods}
+                onToggleGenre={(genre) => setGenres((prev) => toggleItem(prev, genre))}
+                onToggleMood={(mood) => setMoods((prev) => toggleItem(prev, mood))}
+              />
+            )}
+            {step === 2 && (
+              <StepFavorites
+                favorites={favorites}
+                onChange={setFavorites}
+                createId={createId}
+              />
+            )}
+            {step === 3 && (
+              <StepVs
+                vs={vs}
+                onPick={(key, text) => setVs((prev) => ({ ...prev, [key]: text }))}
+              />
+            )}
+            {step === 4 && <StepFree value={freeText} onChange={setFreeText} />}
+          </div>
 
-      {step > 1 && (
-        <button type="button" className="survey__prev" onClick={handlePrev}>
-          이전
-        </button>
+          {step === LAST_STEP && error && <p className="survey__error">{error}</p>}
+
+          {step > 1 && (
+            <button type="button" className="survey__prev" onClick={handlePrev}>
+              이전
+            </button>
+          )}
+          <button
+            type="button"
+            className={`survey__next${step === LAST_STEP ? " survey__next--submit" : ""}${canNext ? " survey__next--enabled" : ""}`}
+            onClick={handleNext}
+            disabled={!canNext}
+          >
+            {step === LAST_STEP ? (submitting ? "분석 중..." : "분석하기") : "다음"}
+          </button>
+        </>
       )}
-      <button
-        type="button"
-        className={`survey__next${step === LAST_STEP ? " survey__next--submit" : ""}${canNext ? " survey__next--enabled" : ""}`}
-        onClick={handleNext}
-        disabled={!canNext}
-      >
-        {step === LAST_STEP ? "분석하기" : "다음"}
-      </button>
 
       {leaveOpen && (
         <LeaveModal
