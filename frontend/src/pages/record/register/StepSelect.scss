@@ -75,6 +75,7 @@ $font: "Paperlogy", sans-serif;
     display: flex;
     align-items: flex-start;
     gap: 7px;
+    max-width: 280px;
     padding: 0;
     border: 0;
     background: none;
@@ -99,7 +100,7 @@ $font: "Paperlogy", sans-serif;
     gap: 7px;
     width: 100%;
     height: 100%;
-    padding: 9px 0 0 10px;
+    padding: 9px 10px 0;
     border: 0;
     background: none;
     text-align: left;
@@ -129,6 +130,8 @@ $font: "Paperlogy", sans-serif;
     line-height: normal;
     color: #000;
     white-space: nowrap;
+    min-width: 0;
+    flex: 1;
   }
 
   &__calendar {
@@ -161,6 +164,21 @@ $font: "Paperlogy", sans-serif;
       width: 10px;
       height: 18px;
     }
+
+    // 피그마 값 없음 — 범위 밖 화살표 임시 비활성 스타일
+    &--disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+  }
+
+  // 피그마 값 없음 — 달력 대신 보여주는 안내 한 줄 임시 스타일
+  &__notice {
+    margin: 8px 0 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: normal;
+    color: $gray-light;
   }
 
   &__month {

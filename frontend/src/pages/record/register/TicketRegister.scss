@@ -181,4 +181,28 @@ $font: "Paperlogy", sans-serif;
       cursor: pointer;
     }
   }
+
+  // 피그마 값 없음 — 임시 에러 문구 스타일
+  &__error {
+    margin: 8px 0 0;
+    font-family: $font;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: normal;
+    color: #e5484d;
+
+    &--footer {
+      margin: 0 0 12px;
+      padding: 0 32px;
+    }
+  }
+
+  &__status {
+    margin: 40px 0 0;
+    font-family: $font;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    color: #656565;
+  }
 }

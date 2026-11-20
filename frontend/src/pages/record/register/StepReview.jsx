@@ -1,6 +1,5 @@
 import { useState } from "react";
 import CastSheet from "./CastSheet.jsx";
-import { getShowCast } from "./registerMock.js";
 import iconStarFilled from "../../../assets/register/icon-star-lg-filled.svg";
 import iconStarEmpty from "../../../assets/register/icon-star-lg-empty.svg";
 import "./StepReview.scss";
@@ -19,8 +18,11 @@ const StepReview = ({ form, onChange }) => {
     onChange({ actorReviews: { ...form.actorReviews, [activeActor]: value } });
   };
 
+  // 페어는 이 티켓에서 선택한 캐스팅 안에서만 고른다.
+  const pairSelected = form.pair.filter((name) => form.casting.includes(name));
+
   const handlePairDone = (pair) => {
-    onChange({ pair });
+    onChange({ pair: pair.filter((name) => form.casting.includes(name)) });
     setPairOpen(false);
   };
 
@@ -80,7 +82,7 @@ const StepReview = ({ form, onChange }) => {
           주연배우 페어에 대한 후기를 작성해주세요
         </p>
         <div className="step-review__chips">
-          {form.pair.map((name) => (
+          {pairSelected.map((name) => (
             <span
               key={name}
               className="step-review__chip step-review__chip--pair"
@@ -105,8 +107,8 @@ const StepReview = ({ form, onChange }) => {
 
       {pairOpen && (
         <CastSheet
-          cast={getShowCast(form.show)}
-          selected={form.pair}
+          cast={form.casting}
+          selected={pairSelected}
           onDone={handlePairDone}
           onClose={() => setPairOpen(false)}
         />

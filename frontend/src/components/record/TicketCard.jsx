@@ -1,4 +1,5 @@
 import ticketOutline from "../../assets/record/ticket-card-outline-a.svg";
+import MarqueeText from "../common/MarqueeText.jsx";
 import "./TicketCard.scss";
 
 const DOT_COUNT = 7;
@@ -20,7 +21,7 @@ const TicketCard = ({ record, onClick }) => {
       </span>
       <span className="ticket-card__info">
         <span className="ticket-card__genre">{record.genre}</span>
-        <span className="ticket-card__title">{record.title}</span>
+        <MarqueeText text={record.title} className="ticket-card__title" />
         <span className="ticket-card__meta">
           <span>{record.date}</span>
           <span>{record.time}</span>
