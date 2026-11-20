@@ -1,14 +1,17 @@
-import { get, post, del } from "./client.js";
+import { http } from "./http.js";
 
-// 작품 상세 (헤더의 장르/제목 표시용)
-export const fetchShow = (performanceId) => get(`/api/shows/${performanceId}`);
+// opts: { sort: "latest" | (좋아요순 값은 스웨거 확인), mineOnly, page, size }
+// 응답: { content:[{reviewId,type,authorName,content,viewedAt,actors,likeCount,likedByMe}], page,size,totalElements,totalPages,first,last }
+export const fetchShowReviews = (id, opts = {}) =>
+  http(`/api/shows/${id}/reviews`, { params: opts });
+export const fetchPairReviews = (id, actorIds, opts = {}) =>
+  http(`/api/shows/${id}/pairs/reviews`, { params: { actorIds, ...opts } });
+export const fetchActorReviews = (id, actorName, opts = {}) =>
+  http(`/api/shows/${id}/actors/reviews`, { params: { actorName, ...opts } });
 
-// 배우별 후기 목록
-// sort: latest | likes, mineOnly: 내 후기만
-// → { content:[{reviewId,authorName,content,viewedAt,likeCount,likedByMe,...}], page,size,totalElements,totalPages,first,last }
-export const fetchActorReviews = (performanceId, actorName, { sort = "latest", mineOnly = false, page = 0, size = 50 } = {}) =>
-  get(`/api/shows/${performanceId}/actors/reviews`, { actorName, sort, mineOnly, page, size });
+// 응답: { reviewId, likeCount, likedByMe }
+export const likeReview = (reviewId) => http(`/api/reviews/${reviewId}/likes`, { method: "POST" });
+export const unlikeReview = (reviewId) => http(`/api/reviews/${reviewId}/likes`, { method: "DELETE" });
 
-// 좋아요 등록 / 취소 → { reviewId, likeCount, likedByMe }
-export const likeReview = (reviewId) => post(`/api/reviews/${reviewId}/likes`);
-export const unlikeReview = (reviewId) => del(`/api/reviews/${reviewId}/likes`);
+// 페어 추천: { status: RECOMMENDED|INSUFFICIENT_EVIDENCE|NO_PAIR_REVIEWS, actorIds, actors:[{actorId,name}], reason }
+export const fetchPairRecommendation = (id) => http(`/api/recommendations/pair/${id}`);

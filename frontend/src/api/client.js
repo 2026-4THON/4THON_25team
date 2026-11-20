@@ -40,14 +40,21 @@ export async function request(path, { method = "GET", params, body } = {}) {
     headers[headerName] = token;
   }
 
-  const res = await fetch(url, {
+    const res = await fetch(url, {
     method,
     headers,
     credentials: "include",
+    redirect: "manual", // 로그인 리다이렉트를 따라가지 않음
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
-  if (res.status === 204) return null;
+  // 로그인 안 된 요청이 리다이렉트로 돌아온 경우 → 401로 처리
+  if (res.type === "opaqueredirect") {
+    if (onUnauthorized) onUnauthorized();
+    throw new ApiError(401, "로그인이 필요해요");
+  }
+
+  if (res.status === 204) return null
 
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;

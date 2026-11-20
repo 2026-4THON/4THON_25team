@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import "./explore.scss";
+import { fetchAnalysisReport, fetchMySummary, postExplore } from "../../api/my.js";
 
 import chevronIcon from "../../assets/home/chevron.svg"; 
 import playIcon from "../../assets/home/play.svg"; 
@@ -9,8 +10,9 @@ import playIcon from "../../assets/home/play.svg";
 import backIcon from "../../assets/home/back.svg";
 import posterSample from "../../assets/home/poster.png";
 
-//임시 데이터
-const ANALYSIS = "비극적인 서사와 깊은 감정선으로 여운을 남기는 작품을 선호해요";
+const COMPANION_PARAM = { 혼자: "ALONE", 연인: "PARTNER", 친구: "FRIEND", 가족: "FAMILY" };
+const MODE_PARAM = { report: "REPORT", new: "NEW", any: "ANY" };
+const GENRE_LABEL = { MUSICAL: "뮤지컬", PLAY: "연극", ETC: "기타" };
 
 const COMPANIONS = ["혼자", "연인", "친구", "가족"];
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -24,12 +26,15 @@ const MOODS = [
   "긴장감 있고 몰입감 있는", "비극적이고 슬픈", "여운이 길고 사색적인", "잔잔하고 뭉클한",
 ];
 
-const SOURCES = [
+const makeSources = (analysis) => [
   {
     key: "report",
     title: "나의 취향 분석 레포트 반영하기",
-    desc: "기존에 입력했던 나의 취향 레포트를 그대로 반영해요",
-    quote: `‘${ANALYSIS}’`,
+    desc: analysis
+      ? "기존에 입력했던 나의 취향 레포트를 그대로 반영해요"
+      : "아직 취향 레포트가 없어요. 취향 분석을 먼저 해주세요",
+    quote: analysis ? `‘${analysis}’` : undefined,
+    disabled: !analysis,
   },
   {
     key: "new",
@@ -43,12 +48,13 @@ const SOURCES = [
   },
 ];
 
-const RESULTS = [1, 2, 3, 4].map((id) => ({
-  id,
-  title: "팬레터",
-  genre: "뮤지컬",
-  poster: posterSample,
-}));
+const pickItems = (d) => d?.items ?? d?.performances ?? d?.results ?? d?.recommendations ?? [];
+const toCard = (it) => ({
+  id: it.performanceId ?? it.id,
+  title: it.title,
+  genre: GENRE_LABEL[it.genre] ?? it.genre ?? "",
+  poster: it.posterUrl || posterSample,
+});
 
 const TICKET_PATH = (() => {
   const W = 338, H = 118, R = 5;
@@ -87,6 +93,20 @@ function Explore() {
   const [genres, setGenres] = useState([]);
   const [moods, setMoods] = useState([]);
 
+  const [analysis, setAnalysis] = useState(null);
+  const [nickname, setNickname] = useState("");
+  const [result, setResult] = useState({ loading: false, error: "", status: "", items: [], summary: "" });
+  const SOURCES = useMemo(() => makeSources(analysis), [analysis]);
+
+  useEffect(() => {
+    fetchAnalysisReport()
+      .then((d) => setAnalysis(d?.briefing || null))
+      .catch(() => setAnalysis(null));
+    fetchMySummary()
+      .then((d) => setNickname(d?.nickname ?? ""))
+      .catch(() => {});
+  }, []);
+
   // 달력 칸 (앞쪽은 빈칸)
   const cells = useMemo(() => {
     const first = new Date(cursor.y, cursor.m, 1).getDay();
@@ -116,9 +136,38 @@ function Explore() {
   const goNext = () => {
     if (!canNext) return;
     if (step === "situation") setStep("genre");
-    else if (step === "genre") setStep(source === "new" ? "taste" : "result");
-    else if (step === "taste") setStep("result");
-    // TODO: 조건(who, dates, budget, wish, source, genres, moods)으로 추천 API 호출
+    else if (step === "genre") {
+      if (source === "new") setStep("taste");
+      else runExplore();
+    } else if (step === "taste") runExplore();
+  };
+
+  const runExplore = () => {
+    setStep("result");
+    setResult({ loading: true, error: "", status: "", items: [], summary: "" });
+    const body = {
+      companion: COMPANION_PARAM[who],
+      dates: [...dates].sort(),
+      wish: wish.trim(),
+      mode: MODE_PARAM[source],
+      genres: source === "new" ? genres : [],
+      moods: source === "new" ? moods : [],
+    };
+    if (budget > 0) body.budget = budget * 10000;
+    postExplore(body)
+      .then((d) =>
+        setResult({
+          loading: false,
+          error: "",
+          status: d?.status ?? "",
+          items: pickItems(d).slice(0, 4).map(toCard),
+          summary: d?.briefing ?? d?.summary ?? d?.reason ?? "",
+        })
+      )
+      .catch((e) => {
+        console.error("[explore] 요청 실패", e);
+        setResult({ loading: false, error: String(e.status ?? "error"), status: "", items: [], summary: "" });
+      });
   };
 
   const goPrev = () => {
@@ -132,15 +181,16 @@ function Explore() {
   // ---------- 결과 화면 ----------
   if (step === "result") {
     const summary =
-      source === "report"
-        ? ANALYSIS
+      result.summary ||
+      (source === "report"
+        ? analysis
         : source === "new"
-          ? `${genres.join("·")} 장르와 ${moods.join(", ")} 분위기를 바탕으로 골라봤어요` // TODO: AI 한줄요약
-          : "조건에 맞는 가장 인기있는 공연을 추천해드려요";
+          ? `${genres.join("·")} 장르와 ${moods.join(", ")} 분위기를 바탕으로 골라봤어요`
+          : "조건에 맞는 가장 인기있는 공연을 추천해드려요");
 
     return (
       <div className="explore-result">
-        <h2 className="explore-result__title">현재 @아이디 님에게 딱 맞는 공연은!</h2>
+        <h2 className="explore-result__title">현재 @{nickname} 님에게 딱 맞는 공연은!</h2>
         <p className="explore-result__summary">{summary}</p>
 
         <div className="explore-result__chips">
@@ -156,7 +206,16 @@ function Explore() {
         </div>
 
         <div className="explore-result__grid">
-          {RESULTS.map((item, i) => (
+          {result.loading && <p className="explore-result__summary">추천 공연을 찾는 중...</p>}
+          {!result.loading && result.error && (
+            <p className="explore-result__summary">추천을 불러오지 못했어요 ({result.error})</p>
+          )}
+          {!result.loading && !result.error && result.items.length === 0 && (
+            <p className="explore-result__summary">
+              {result.status === "NO_MATCH" ? "조건에 맞는 공연이 없어요" : "추천할 공연이 없어요"}
+            </p>
+          )}
+          {result.items.map((item, i) => (
             <button
               key={item.id}
               type="button"
@@ -304,13 +363,15 @@ function Explore() {
         {/* STEP 2: 장르 기준 선택 */}
         {step === "genre" && (
           <div className="explore__options">
-            {SOURCES.map(({ key, title, desc, quote }) => (
+            {SOURCES.map(({ key, title, desc, quote, disabled }) => (
               <button
                 key={key}
                 type="button"
                 className={source === key ? "explore__option explore__option--on" : "explore__option"}
                 onClick={() => setSource(key)}
                 aria-pressed={source === key}
+                disabled={disabled}
+                style={disabled ? { opacity: 0.4 } : undefined}
               >
                 <span className="explore__option-box">
                     <svg className="explore__ticket" viewBox="0 0 338 118" aria-hidden="true">
