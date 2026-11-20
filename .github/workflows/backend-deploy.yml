@@ -73,7 +73,7 @@ jobs:
           env_vars: |
             SPRING_PROFILES_ACTIVE=prod
             DB_USERNAME=danglog_app
-            FRONTEND_URL=http://localhost:5173
+            FRONTEND_URL=https://danglog-backend-40913066893.asia-northeast3.run.app
 
           env_vars_update_strategy: merge
 
