@@ -8,16 +8,22 @@ export default defineConfig(({ mode }) => {
   const target = env.VITE_PROXY_TARGET || 'http://localhost:8080'
 
   const proxy = {
-  target,
-  changeOrigin: true,
-  secure: true,
-  cookieDomainRewrite: 'localhost',
-  configure: (p) => {
-    p.on('proxyReq', (req) => {
-      if (env.VITE_DEV_COOKIE) req.setHeader('cookie', env.VITE_DEV_COOKIE)
-    })
-  },
-}
+    target,
+    changeOrigin: true,
+    secure: true,
+    cookieDomainRewrite: 'localhost',
+    configure: (p) => {
+      p.on('proxyReq', (req) => {
+        if (!env.VITE_DEV_COOKIE) return
+        // 브라우저 쿠키(XSRF-TOKEN 등)는 유지하고 JSESSIONID 만 개발용 값으로 교체
+        const rest = (req.getHeader('cookie') || '')
+          .split(/;\s*/)
+          .filter((c) => c && !c.startsWith('JSESSIONID='))
+          .join('; ')
+        req.setHeader('cookie', rest ? `${env.VITE_DEV_COOKIE}; ${rest}` : env.VITE_DEV_COOKIE)
+      })
+    },
+  }
 
   return {
     plugins: [react()],

@@ -1,16 +1,26 @@
 // 공통 fetch 래퍼. recommend.js 등 기존 파일은 그대로 두고, 새 api 파일들만 이걸 씁니다.
 const BASE = import.meta.env.VITE_API_BASE ?? "";
 
-let csrfCache = null;
+const readCookie = (name) => {
+  const hit = document.cookie.split("; ").find((c) => c.startsWith(`${name}=`));
+  return hit ? decodeURIComponent(hit.slice(name.length + 1)) : null;
+};
+
+// 서버가 XSRF-TOKEN 쿠키 값을 그대로 헤더로 받는 방식이라 쿠키에서 읽어 보냄
 async function getCsrf() {
-  if (csrfCache) return csrfCache;
-  try {
-    const res = await fetch(`${BASE}/auth/csrf`, { credentials: "include" });
-    if (res.ok) csrfCache = await res.json(); // { headerName, token }
-  } catch {
-    /* csrf 꺼져 있으면 무시 */
+  let token = readCookie("XSRF-TOKEN");
+  if (!token) {
+    try {
+      const res = await fetch(`${BASE}/auth/csrf`, { credentials: "include" });
+      if (res.ok) {
+        const body = await res.json(); // { headerName, token }
+        token = readCookie("XSRF-TOKEN") || body.token;
+      }
+    } catch {
+      /* csrf 꺼져 있으면 무시 */
+    }
   }
-  return csrfCache;
+  return token ? { headerName: "X-XSRF-TOKEN", token } : null;
 }
 
 export class ApiError extends Error {

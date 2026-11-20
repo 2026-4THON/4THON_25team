@@ -33,6 +33,7 @@ const toView = (d) => ({
     .filter(Boolean)
     .map((k) => (k.startsWith("#") ? k : `#${k}`)),
   synopsis: d.synopsis ?? "",
+  synopsisAi: d.synopsisSource === "AI_IMAGE" || d.synopsisGenerated === true,
   period: d.startDate
     ? `${formatDot(d.startDate)} ~ ${d.openRun && !d.endDate ? "" : formatDot(d.endDate)}`.trim()
     : "",
@@ -148,6 +149,13 @@ function Detail() {
               <h2 className="detail__label">시놉시스</h2>
               {d.synopsis ? (
                 <>
+                  {open && d.synopsisAi && (
+                    <p className="detail__notice">
+                      ※ 본 시놉시스는 공식 시놉시스를 불러오지 못해,
+                      <br />
+                      제공된 이미지 자료를 바탕으로 임의로 추출 및 재구성한 내용임을 알려드립니다.
+                    </p>
+                  )}
                   <p className={open ? "detail__synopsis detail__synopsis--open" : "detail__synopsis"}>
                     {d.synopsis}
                   </p>
