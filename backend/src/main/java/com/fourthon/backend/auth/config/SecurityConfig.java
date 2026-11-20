@@ -12,6 +12,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
@@ -36,14 +39,29 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http) throws Exception {
 
+        // CSRF 토큰 쿠키 설정
+        CookieCsrfTokenRepository repo =
+                CookieCsrfTokenRepository.withHttpOnlyFalse();
+
+        // 크로스 사이트 환경에서 쿠키 전송 허용
+        repo.setCookieCustomizer(cookie -> cookie
+                .sameSite("None")
+                .secure(true)
+        );
+
         http
                 // 프론트엔드 요청 허용
                 .cors(cors -> cors.configurationSource(
                         corsConfigurationSource()
                 ))
 
-                // CSRF 보호 유지 + SPA 쿠키 기반 토큰 처리
-                .csrf(csrf -> csrf.spa())
+                // CSRF 보호 유지 + 원본 토큰 사용
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(repo)
+                        .csrfTokenRequestHandler(
+                                new CsrfTokenRequestAttributeHandler()
+                        )
+                )
 
                 // API 접근 권한
                 .authorizeHttpRequests(auth -> auth
@@ -94,22 +112,34 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
+        // 허용할 프론트엔드 주소
         config.setAllowedOrigins(
                 List.of(frontendUrl)
         );
 
+        // 허용할 HTTP 메서드
         config.setAllowedMethods(
-                List.of("GET", "POST", "PUT", "PATCH", "DELETE")
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE",
+                        "OPTIONS"
+                )
         );
 
+        // 허용할 요청 헤더
         config.setAllowedHeaders(
                 List.of(
                         "Content-Type",
+                        "Authorization",
                         "X-CSRF-TOKEN",
                         "X-XSRF-TOKEN"
                 )
         );
 
+        // 쿠키를 포함한 요청 허용
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
