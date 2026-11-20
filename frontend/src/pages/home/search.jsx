@@ -1,22 +1,15 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import "./search.scss";
+import { searchPerformances } from "../../api/search.js";
+
+const GENRE_LABEL = { MUSICAL: "뮤지컬", PLAY: "연극", ETC: "기타" };
 
 import closeIcon from "../../assets/home/close.svg"; 
 import backIcon from "../../assets/home/back.svg";
 import searchIcon from "../../assets/home/search.svg";
 
-//  임시 작품 목록
-const WORKS = [
-  { id: 1, genre: "뮤지컬", title: "죽음에 관하여" },
-  { id: 2, genre: "뮤지컬", title: "팬레터" },
-  { id: 3, genre: "연극", title: "팬텀" },
-  { id: 4, genre: "뮤지컬", title: "팬텀싱어" },
-];
-
-// 시안 기준
-const SEED_RECENT = [WORKS[0], WORKS[1]];
 
 const STORAGE_KEY = "daengrog:recent-searches";
 const MAX_RECENT = 10;
@@ -24,25 +17,56 @@ const MAX_RECENT = 10;
 const loadRecent = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : SEED_RECENT;
+    return raw ? JSON.parse(raw) : [];
   } catch {
-    return SEED_RECENT;
+    return [];
   }
 };
 
 function Search() {
   const navigate = useNavigate();
-  const [query, setQuery] = useState("");
+  const { state } = useLocation();
+  const [query, setQuery] = useState(state?.q ?? "");
+  const [results, setResults] = useState([]);
+  const [error, setError] = useState(""); // 요청 실패 시 상태코드 표시(원인 파악용)
   const [recent, setRecent] = useState(loadRecent);
 
   const keyword = query.trim();
-  const results = keyword ? WORKS.filter((w) => w.title.includes(keyword)) : [];
+
+  // 입력 중이면 검색 결과(0.3초 디바운스), 비어 있으면 최근 검색
+  useEffect(() => {
+    if (!keyword) {
+      setResults([]);
+      setError("");
+      return;
+    }
+    let alive = true;
+    const t = setTimeout(() => {
+      searchPerformances(keyword)
+        .then((list) => {
+          if (!alive) return;
+          setError("");
+          setResults((list ?? []).map((p) => ({ id: p.id, title: p.title, genre: GENRE_LABEL[p.genre] ?? "기타" })));
+        })
+        .catch((e) => {
+          if (!alive) return;
+          console.error("[search] 요청 실패", e);
+          setResults([]);
+          setError(String(e.status ?? e.message ?? "error"));
+        });
+    }, 300);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
+  }, [keyword]);
 
   const saveRecent = (list) => {
     setRecent(list);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     } catch {
+      // 저장이 막혀 있어도 화면은 그대로 동작해요
     }
   };
 
@@ -51,6 +75,7 @@ function Search() {
 
   const removeRecent = (id) => saveRecent(recent.filter((r) => r.id !== id));
 
+  // 검색 결과를 누르면 최근 검색에 쌓고 작품 상세로 이동
   const openWork = (work) => {
     addRecent(work);
     navigate(`/detail/${work.id}`);
@@ -82,6 +107,7 @@ function Search() {
       </form>
 
       {keyword ? (
+        // ---------- 입력 중: 자동완성 결과 ----------
         <ul className="search__list search__list--results">
           {results.map((w) => (
             <li className="search__item" key={w.id}>
@@ -93,9 +119,11 @@ function Search() {
               </button>
             </li>
           ))}
-          {results.length === 0 && <li className="search__empty">검색 결과가 없어요</li>}
+          {error && <li className="search__empty">검색에 실패했어요 ({error})</li>}
+          {!error && results.length === 0 && <li className="search__empty">검색 결과가 없어요</li>}
         </ul>
       ) : (
+        // ---------- 기본: 최근 검색 ----------
         <>
           <h2 className="search__heading">최근 검색</h2>
           <ul className="search__list">

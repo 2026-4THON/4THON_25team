@@ -1,17 +1,67 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AnalysisResult from "./result/AnalysisResult.jsx";
-import { getTaste } from "./analysisStore.js";
+import { ApiError } from "../../api/client.js";
+import { fetchReport } from "../../api/analysis.js";
+import { toTaste } from "./analysisApi.js";
 import "./Analysis.scss";
 
 const HOLES = Array.from({ length: 9 }, (_, i) => i);
 
 const Analysis = () => {
   const navigate = useNavigate();
-  const [taste] = useState(() => getTaste());
+  // status: "loading" | "empty"(리포트 없음) | "error" | "done"
+  const [status, setStatus] = useState("loading");
+  const [taste, setTaste] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  if (taste?.done === true) {
+  useEffect(() => {
+    let cancelled = false;
+    fetchReport()
+      .then((report) => {
+        if (cancelled) return;
+        setTaste(toTaste(report));
+        setStatus("done");
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const empty = err instanceof ApiError && err.status === 404;
+        setStatus(empty ? "empty" : "error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
+
+  const handleRetry = () => {
+    setStatus("loading");
+    setReloadKey((prev) => prev + 1);
+  };
+
+  if (status === "done" && taste) {
     return <AnalysisResult taste={taste} />;
+  }
+
+  if (status === "loading" || status === "error") {
+    return (
+      <div className="analysis">
+        <header className="analysis__header">
+          <h1 className="analysis__title">나의 취향 레포트</h1>
+        </header>
+        <p className="analysis__status">
+          {status === "loading" ? "불러오는 중" : "불러오지 못했어요"}
+        </p>
+        {status === "error" && (
+          <button
+            type="button"
+            className="analysis__start"
+            onClick={handleRetry}
+          >
+            다시 시도
+          </button>
+        )}
+      </div>
+    );
   }
 
   return (

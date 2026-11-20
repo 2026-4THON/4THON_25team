@@ -1,6 +1,5 @@
 import { useState } from "react";
 import CastSheet from "./CastSheet.jsx";
-import { getShowCast } from "./registerMock.js";
 import iconSmileGood from "../../../assets/register/icon-smile-good.svg";
 import iconSmileNormal from "../../../assets/register/icon-smile-normal.svg";
 import iconSmileBad from "../../../assets/register/icon-smile-bad.svg";
@@ -15,12 +14,6 @@ const RECOMMENDS = [
 ];
 
 const onlyDigits = (value) => value.replace(/\D/g, "");
-
-const sanitizeRow = (value) => {
-  const letters = value.match(/[A-Za-z]/g);
-  if (letters) return letters[letters.length - 1].toUpperCase();
-  return onlyDigits(value);
-};
 
 const UnitInput = ({
   value,
@@ -79,7 +72,7 @@ const StepDetail = ({ form, onChange }) => {
             value={form.row}
             unit="열"
             size="seat"
-            sanitize={sanitizeRow}
+            sanitize={onlyDigits}
             inputMode="text"
             onChange={(row) => onChange({ row })}
           />
@@ -187,7 +180,7 @@ const StepDetail = ({ form, onChange }) => {
 
       {castOpen && (
         <CastSheet
-          cast={getShowCast(form.show)}
+          cast={(form.castList ?? []).map((c) => c.name)}
           selected={form.casting}
           onDone={handleCastDone}
           onClose={() => setCastOpen(false)}

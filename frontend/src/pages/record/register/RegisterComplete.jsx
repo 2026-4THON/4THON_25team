@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getRecords } from "../recordStore.js";
+import { useLocation, useNavigate } from "react-router-dom";
+import { fetchTickets } from "../../../api/ticket.js";
 import completeLogo from "../../../assets/record/complete-logo.png";
 import completeSparkle from "../../../assets/record/complete-sparkle.svg";
 import "./RegisterComplete.scss";
@@ -10,7 +10,14 @@ const REDIRECT_MS = 2000;
 
 const RegisterComplete = () => {
   const navigate = useNavigate();
-  const [count] = useState(() => getRecords().length);
+  const location = useLocation();
+  const fallbackCount = location.state?.ticketNumber;
+  // loading: 응답 전(N 숨김) / done: 내 티켓 총 개수 / error: state.ticketNumber 사용
+  const [countState, setCountState] = useState({ status: "loading" });
+
+  let count = null;
+  if (countState.status === "done") count = countState.total;
+  else if (countState.status === "error") count = fallbackCount ?? null;
 
   const goRecord = () => navigate("/record", { replace: true });
 
@@ -20,6 +27,26 @@ const RegisterComplete = () => {
     }, REDIRECT_MS);
     return () => clearTimeout(timer);
   }, [navigate]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchTickets()
+      .then((res) => {
+        if (cancelled) return;
+        if (Array.isArray(res)) {
+          setCountState({ status: "done", total: res.length });
+        } else {
+          setCountState({ status: "error" });
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setCountState({ status: "error" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="complete" onClick={goRecord}>
@@ -44,7 +71,7 @@ const RegisterComplete = () => {
       </div>
       <p className="complete__text">티켓 등록이 완료되었습니다</p>
       <img className="complete__sparkle" src={completeSparkle} alt="" />
-      <p className="complete__count">{count}번째 티켓</p>
+      {count != null && <p className="complete__count">{count}번째 티켓</p>}
     </div>
   );
 };

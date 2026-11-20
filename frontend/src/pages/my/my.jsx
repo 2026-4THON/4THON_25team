@@ -1,7 +1,32 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import "./my.scss";
 import { fetchMySummary } from "../../api/my.js";
+import { logout } from "../../api/logout.js";
+
+// 서버 응답(/api/my/summary) -> 화면용
+const toView = (d) => ({
+  userId: d.nickname,
+  analysis: d.tasteBriefing ? d.tasteBriefing : null, // 없으면 빈 문자열 -> null
+  tickets: [
+    { label: "뮤지컬", count: d.ticketCounts?.musical ?? 0 },
+    { label: "연극", count: d.ticketCounts?.play ?? 0 },
+    { label: "기타", count: d.ticketCounts?.other ?? 0 },
+  ],
+  reviews: [
+    { label: "공연", count: d.reviewCounts?.performance ?? 0 },
+    { label: "배우", count: d.reviewCounts?.actor ?? 0 },
+    { label: "페어", count: d.reviewCounts?.pair ?? 0 },
+  ],
+  spending: [
+    { label: "티켓", amount: d.expenses?.ticketTotal ?? 0 },
+    // 서버는 양수로 주고, 화면에서는 차감(-)으로 보여줘요. 이미 음수면 그대로 둬요
+    { label: "청년 문화 예술 패스", amount: -Math.abs(d.expenses?.culturePassTotal ?? 0) },
+    { label: "MD", amount: d.expenses?.mdTotal ?? 0 },
+  ],
+  totalSpending: d.expenses?.totalSpending ?? 0,
+});
 
 const DEFAULT_MESSAGE = "나의 취향을 분석 해볼까요?";
 
@@ -30,55 +55,37 @@ function StatCard({ items }) {
   );
 }
 
-// 서버 응답 -> 화면에서 쓰는 모양으로 변환
-function toView(s) {
-  const t = s.ticketCounts ?? {};
-  const r = s.reviewCounts ?? {};
-  const e = s.expenses ?? {};
-  return {
-    userId: s.nickname,
-    analysis: s.tasteBriefing || null, // 없으면 빈 문자열이므로 || 사용
-    tickets: [
-      { label: "뮤지컬", count: t.musical ?? 0 },
-      { label: "연극", count: t.play ?? 0 },
-      { label: "기타", count: t.other ?? 0 },
-    ],
-    reviews: [
-      { label: "공연", count: r.performance ?? 0 },
-      { label: "배우", count: r.actor ?? 0 },
-      { label: "페어", count: r.pair ?? 0 },
-    ],
-    spending: [
-      { label: "티켓", amount: e.ticketTotal ?? 0 },
-      // 청년 문화 예술 패스는 차감 금액이라 항상 마이너스로 표시
-      { label: "청년 문화 예술 패스", amount: -Math.abs(e.culturePassTotal ?? 0) },
-      { label: "MD", amount: e.mdTotal ?? 0 },
-    ],
-    totalSpending: e.totalSpending ?? 0,
-  };
-}
-
 function My() {
-  const [state, setState] = useState({ data: null, error: false });
+  const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    let cancelled = false;
+    let alive = true;
     fetchMySummary()
-      .then((s) => !cancelled && setState({ data: toView(s), error: false }))
-      .catch(() => !cancelled && setState({ data: null, error: true }));
+      .then((d) => alive && setData(toView(d)))
+      .catch((e) => {
+        console.error("[my] 요청 실패", e);
+        if (alive) setError(String(e.status ?? "error"));
+      });
     return () => {
-      cancelled = true;
+      alive = false;
     };
   }, []);
 
-  if (state.error) {
+  const handleLogout = async () => {
+    await logout();
+    navigate("/start", { replace: true });
+  };
+
+  if (error) {
     return (
       <main className="my">
-        <p className="my__message">마이페이지를 불러오지 못했어요</p>
+        <p className="my__message">마이페이지를 불러오지 못했어요 ({error})</p>
       </main>
     );
   }
-  if (!state.data) {
+  if (!data) {
     return (
       <main className="my">
         <p className="my__message">불러오는 중...</p>
@@ -86,12 +93,15 @@ function My() {
     );
   }
 
-  const { userId, analysis, tickets, reviews, spending, totalSpending } = state.data;
+  const { userId, analysis, tickets, reviews, spending, totalSpending } = data;
 
   return (
     <main className="my">
       <header className="my__header">
         <p className="my__slogan">대학로 공연 관극 기록엔 ‘댕로그’</p>
+        <button type="button" className="my__logout" onClick={handleLogout}>
+          로그아웃
+        </button>
       </header>
 
       <section className="my__profile">

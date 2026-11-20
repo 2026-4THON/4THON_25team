@@ -94,6 +94,16 @@ $divider: #cfe3f5;
     cursor: default;
   }
 
+  // AI 추천 안내 문구 (페어 영역 아래)
+  &__reason {
+    margin: 10px 26px 0;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+    color: #919191;
+  }
+
   &__subtitle {
     margin-top: 42px;
   }

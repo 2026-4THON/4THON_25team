@@ -119,7 +119,7 @@ const AnalysisResult = ({ taste }) => {
         </section>
 
         <section className="result__section result__section--free">
-          <SectionHead title="자유 서술" />
+          <SectionHead title="자유 입력" />
           <p className="result__free">{freeText}</p>
         </section>
       </div>
