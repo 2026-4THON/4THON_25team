@@ -1,5 +1,6 @@
 package com.fourthon.backend.map.service;
 
+import com.fourthon.backend.common.exception.CodedException;
 import com.fourthon.backend.map.domain.MapMode;
 import com.fourthon.backend.map.domain.Venue;
 import com.fourthon.backend.map.dto.MapResponse;
@@ -10,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -58,8 +58,9 @@ public class MapService {
 
     private void requireVenue(Long venueId) {
         if (!venueRepository.existsById(venueId)) {
-            throw new ResponseStatusException(
+            throw new CodedException(
                     HttpStatus.NOT_FOUND,
+                    "VENUE_NOT_FOUND",
                     "공연장을 찾을 수 없습니다"
             );
         }

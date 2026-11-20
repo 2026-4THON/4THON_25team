@@ -2,6 +2,7 @@ package com.fourthon.backend.taste.service;
 
 import com.fourthon.backend.common.domain.TagType;
 import com.fourthon.backend.common.domain.TasteTag;
+import com.fourthon.backend.common.exception.CodedException;
 import com.fourthon.backend.show.service.ShowTagScoreService;
 import com.fourthon.backend.taste.domain.LifeWork;
 import com.fourthon.backend.taste.domain.LifeWorkCategory;
@@ -25,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -60,7 +60,7 @@ public class TasteService {
 
     public TasteResponse.Report create(Long userId, TasteRequest.Save request) {
         if (tasteReportRepository.existsByUserId(userId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 취향 리포트가 있습니다");
+            throw new CodedException(HttpStatus.CONFLICT, "TASTE_REPORT_EXISTS", "이미 취향 리포트가 있습니다");
         }
         TasteAnswers answers = toAnswers(request);
         TasteAnalysis analysis = tasteAnalyzer.analyze(answers);
@@ -148,8 +148,9 @@ public class TasteService {
 
     private TasteReport requireReport(Long userId) {
         return tasteReportRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResponseStatusException(
+                .orElseThrow(() -> new CodedException(
                         HttpStatus.NOT_FOUND,
+                        "TASTE_REPORT_NOT_FOUND",
                         "취향 리포트가 없습니다"
                 ));
     }
@@ -192,8 +193,8 @@ public class TasteService {
         return vsChoices;
     }
 
-    private ResponseStatusException bad(String message) {
-        return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+    private CodedException bad(String message) {
+        return new CodedException(HttpStatus.BAD_REQUEST, "INVALID_TASTE_INPUT", message);
     }
 
     private LocalDateTime now() {
