@@ -1,9 +1,10 @@
 package com.fourthon.backend.internal.controller;
 
 import com.fourthon.backend.ai.service.ReviewAnalysisService;
+import com.fourthon.backend.common.exception.CodedException;
 import com.fourthon.backend.internal.dto.InternalResponse;
-import com.fourthon.backend.recommendation.service.RecommendationReasonService;
 import com.fourthon.backend.kopis.service.KopisSyncService;
+import com.fourthon.backend.recommendation.service.RecommendationReasonService;
 import com.fourthon.backend.show.service.ShowAnalysisService;
 import com.fourthon.backend.show.service.ShowVideoService;
 
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -40,8 +40,9 @@ public class InternalBatchController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public InternalResponse.Started runKopisSync() {
         if (kopisSyncService.isRunning()) {
-            throw new ResponseStatusException(
+            throw new CodedException(
                     HttpStatus.CONFLICT,
+                    "BATCH_ALREADY_RUNNING",
                     "KOPIS 동기화가 이미 실행 중입니다"
             );
         }
@@ -57,8 +58,9 @@ public class InternalBatchController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public InternalResponse.Started runShowAnalysis() {
         if (showAnalysisService.isRunning()) {
-            throw new ResponseStatusException(
+            throw new CodedException(
                     HttpStatus.CONFLICT,
+                    "BATCH_ALREADY_RUNNING",
                     "공연 분석이 이미 실행 중입니다"
             );
         }
@@ -74,8 +76,9 @@ public class InternalBatchController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public InternalResponse.Started runSynopsisExtraction(@RequestParam List<Long> performanceIds) {
         if (showAnalysisService.isRunning()) {
-            throw new ResponseStatusException(
+            throw new CodedException(
                     HttpStatus.CONFLICT,
+                    "BATCH_ALREADY_RUNNING",
                     "공연 분석이 이미 실행 중입니다"
             );
         }
@@ -91,8 +94,9 @@ public class InternalBatchController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public InternalResponse.Started runEmbeddings() {
         if (reviewAnalysisService.isBatchRunning()) {
-            throw new ResponseStatusException(
+            throw new CodedException(
                     HttpStatus.CONFLICT,
+                    "BATCH_ALREADY_RUNNING",
                     "후기 분석이 이미 실행 중입니다"
             );
         }
@@ -108,8 +112,9 @@ public class InternalBatchController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public InternalResponse.Started runRecommendationReasons() {
         if (recommendationReasonService.isBatchRunning()) {
-            throw new ResponseStatusException(
+            throw new CodedException(
                     HttpStatus.CONFLICT,
+                    "BATCH_ALREADY_RUNNING",
                     "추천 이유 생성이 이미 실행 중입니다"
             );
         }
@@ -125,8 +130,9 @@ public class InternalBatchController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public InternalResponse.Started runShowVideo() {
         if (showVideoService.isRunning()) {
-            throw new ResponseStatusException(
+            throw new CodedException(
                     HttpStatus.CONFLICT,
+                    "BATCH_ALREADY_RUNNING",
                     "공연 영상 검색이 이미 실행 중입니다"
             );
         }
