@@ -91,6 +91,14 @@ $font: "Paperlogy", sans-serif;
     padding: 8px 0;
     list-style: none;
   }
+
+  &__status {
+    margin: 40px 0 0;
+    font-size: 13px;
+    font-weight: 400;
+    text-align: center;
+    color: $gray;
+  }
 }
 
 .layout__screen:has(.record) {

@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getDetail, deleteRecord } from "./recordStore.js";
+import { ApiError } from "../../api/client.js";
+import { fetchTicket, deleteTicket } from "../../api/ticket.js";
+import { toDetail } from "./recordApi.js";
 import iconBack from "../../assets/record/icon-back.svg";
 import iconEdit from "../../assets/record/icon-edit.svg";
 import iconDelete from "../../assets/record/icon-delete.svg";
@@ -15,20 +17,82 @@ import "./RecordDetail.scss";
 
 const STAR_COUNT = 5;
 const PERFORATION_COUNT = 7;
+const LOAD_ERROR = "불러오지 못했어요";
+const NOT_FOUND = "티켓을 찾을 수 없어요";
+const DELETE_ERROR = "티켓을 삭제하지 못했어요";
 
 const RecordDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const data = getDetail(Number(id));
+  // result.id 가 현재 id 와 다르면 아직 불러오는 중이다.
+  const [result, setResult] = useState(null);
   const [tab, setTab] = useState("info");
-  const [selectedActor, setSelectedActor] = useState(data.actors[0]);
+  const [selectedActor, setSelectedActor] = useState("");
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
-  const handleDelete = () => {
-    deleteRecord(Number(id));
-    setIsDeleteOpen(false);
-    navigate("/record", { replace: true });
+  useEffect(() => {
+    let cancelled = false;
+    fetchTicket(Number(id))
+      .then((res) => {
+        if (cancelled) return;
+        const detail = toDetail(res);
+        setResult({ id, data: detail, error: "" });
+        setSelectedActor(detail.actors[0] ?? "");
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const notFound = err instanceof ApiError && err.status === 404;
+        setResult({ id, data: null, error: notFound ? NOT_FOUND : LOAD_ERROR });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  const loaded = result?.id === id;
+  const data = loaded ? result.data : null;
+
+  const handleDelete = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await deleteTicket(Number(id));
+      setIsDeleteOpen(false);
+      navigate("/record", { replace: true });
+    } catch {
+      setDeleteError(DELETE_ERROR);
+      setDeleting(false);
+    }
   };
+
+  const closeDelete = () => {
+    if (deleting) return;
+    setDeleteError("");
+    setIsDeleteOpen(false);
+  };
+
+  if (!data) {
+    return (
+      <div className="record-detail">
+        <header className="record-detail__header">
+          <button
+            type="button"
+            className="record-detail__back"
+            onClick={() => navigate("/record")}
+          >
+            <img src={iconBack} alt="뒤로가기" />
+          </button>
+          <h1 className="record-detail__title">나의기록</h1>
+        </header>
+        <p className="record-detail__status">
+          {loaded ? result.error : "불러오는 중"}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="record-detail">
@@ -170,17 +234,25 @@ const RecordDetail = () => {
               <div className="record-detail__heading">
                 <h3>페어 후기</h3>
               </div>
-              <ul className="record-detail__chips">
-                {data.pairActors.map((name) => (
-                  <li
-                    key={name}
-                    className="record-detail__chip record-detail__chip--outline"
-                  >
-                    {name}
-                  </li>
-                ))}
-              </ul>
-              <p className="record-detail__text">{data.pairReview}</p>
+              {data.pairs.length === 0 ? (
+                <p className="record-detail__text">남긴 후기가 없습니다.</p>
+              ) : (
+                data.pairs.map((pair, index) => (
+                  <div key={index} className="record-detail__pair">
+                    <ul className="record-detail__chips">
+                      {pair.names.map((name) => (
+                        <li
+                          key={name}
+                          className="record-detail__chip record-detail__chip--outline"
+                        >
+                          {name}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="record-detail__text">{pair.content}</p>
+                  </div>
+                ))
+              )}
             </section>
 
             <section className="record-detail__section record-detail__section--actor">
@@ -233,11 +305,15 @@ const RecordDetail = () => {
             <p className="record-detail__modal-desc">
               삭제한 티켓은 복구할 수 없습니다.
             </p>
+            {deleteError && (
+              <p className="record-detail__modal-error">{deleteError}</p>
+            )}
             <div className="record-detail__modal-buttons">
               <button
                 type="button"
                 className="record-detail__modal-keep"
-                onClick={() => setIsDeleteOpen(false)}
+                onClick={closeDelete}
+                disabled={deleting}
               >
                 유지하기
               </button>
@@ -245,6 +321,7 @@ const RecordDetail = () => {
                 type="button"
                 className="record-detail__modal-delete"
                 onClick={handleDelete}
+                disabled={deleting}
               >
                 삭제하기
               </button>

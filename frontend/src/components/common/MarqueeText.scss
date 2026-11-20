@@ -1,0 +1,48 @@
+.marquee {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  &__track {
+    display: inline-flex;
+    gap: 24px;
+    white-space: nowrap;
+  }
+
+  @media (hover: hover) {
+    &--running {
+      text-overflow: clip;
+      -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        #000 6px,
+        #000 calc(100% - 6px),
+        transparent
+      );
+      mask-image: linear-gradient(
+        to right,
+        transparent,
+        #000 6px,
+        #000 calc(100% - 6px),
+        transparent
+      );
+    }
+
+    &--running &__track {
+      animation: marquee-scroll var(--marquee-duration, 0s) linear 0.3s
+        infinite;
+    }
+  }
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(var(--marquee-shift, 0px) * -1));
+  }
+}
