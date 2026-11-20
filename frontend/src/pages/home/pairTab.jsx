@@ -10,11 +10,10 @@ import {
   unlikeReview,
 } from "../../api/reviews.js";
 
-// 배우 후기 페이지에서 쓴 하트 아이콘을 그대로 사용해요
 import heartIcon from "../../assets/home/heart.svg";
 import heartFilledIcon from "../../assets/home/heart-filled.svg";
 
-const MAX_PICK = 3; // 직접 선택 시 고를 수 있는 배우 수 (시안 기준 3명)
+const MAX_PICK = 3; 
 
 const SORTS = [
   { key: "latest", label: "최신순" },
@@ -22,7 +21,6 @@ const SORTS = [
   { key: "mine", label: "내 리뷰" },
 ];
 
-// 서버 후기 -> 화면용
 const toReview = (r) => ({
   id: r.reviewId,
   author: r.authorName,
@@ -54,7 +52,6 @@ function PairTab({ actors = [] }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
-  // AI 페어 추천 (처음 요청 때 서버가 만들어 저장해 둠)
   useEffect(() => {
     let alive = true;
     fetchPairRecommendation(id)
@@ -71,7 +68,6 @@ function PairTab({ actors = [] }) {
     };
   }, [id]);
 
-  // 선택된 페어 + 정렬이 바뀔 때마다 페어 후기 조회
   const pairKey = pair.map((a) => a.id).join(",");
   useEffect(() => {
     if (pair.length === 0) {
@@ -118,7 +114,6 @@ function PairTab({ actors = [] }) {
     setSheetOpen(false);
   };
 
-  // 좋아요: 서버 응답(likeCount, likedByMe)을 그대로 반영
   const toggleLike = useCallback(async (r) => {
     try {
       const res = await (r.liked ? unlikeReview(r.id) : likeReview(r.id));
@@ -130,7 +125,6 @@ function PairTab({ actors = [] }) {
     }
   }, []);
 
-  // 시트는 .layout(390x844 틀) 전체를 덮도록 그 안으로 옮겨 그려요
   const sheet = sheetOpen && (
     <div className="pair-sheet" onClick={() => setSheetOpen(false)}>
       <div

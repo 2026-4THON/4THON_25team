@@ -67,7 +67,6 @@ const STEP_TITLES = {
   taste: ["STEP 2-1", "선호하는 장르와 분위기를 선택해주세요"],
 };
 
-// 날짜 도우미
 const pad = (n) => String(n).padStart(2, "0");
 const toIso = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
 const labelOf = (iso) => {
@@ -107,7 +106,6 @@ function Explore() {
       .catch(() => {});
   }, []);
 
-  // 달력 칸 (앞쪽은 빈칸)
   const cells = useMemo(() => {
     const first = new Date(cursor.y, cursor.m, 1).getDay();
     const days = new Date(cursor.y, cursor.m + 1, 0).getDate();
@@ -126,7 +124,6 @@ function Explore() {
   const toggleGenre = toggleIn(setGenres);
   const toggleMood = toggleIn(setMoods);
 
-  // 단계별로 "다음"을 누를 수 있는 조건
   const canNext = {
     situation: Boolean(who) && dates.length > 0,
     genre: Boolean(source),
@@ -175,10 +172,8 @@ function Explore() {
     else if (step === "taste") setStep("genre");
   };
 
-  // 헤더 화살표: 첫 단계에서는 홈으로, 그 밖에는 이전 단계로
   const handleBack = () => (step === "situation" ? navigate(-1) : goPrev());
 
-  // ---------- 결과 화면 ----------
   if (step === "result") {
     const summary =
       result.summary ||
@@ -238,7 +233,6 @@ function Explore() {
     );
   }
 
-  // ---------- 입력 단계 ----------
   const [stepLabel, stepText] = STEP_TITLES[step];
 
   return (
@@ -360,7 +354,6 @@ function Explore() {
           </div>
         )}
 
-        {/* STEP 2: 장르 기준 선택 */}
         {step === "genre" && (
           <div className="explore__options">
             {SOURCES.map(({ key, title, desc, quote, disabled }) => (
@@ -388,7 +381,6 @@ function Explore() {
           </div>
         )}
 
-        {/* STEP 2-1: 장르 / 분위기 직접 선택 */}
         {step === "taste" && (
           <div className="explore__form">
             <section className="explore__section">
@@ -428,7 +420,6 @@ function Explore() {
         )}
       </div>
 
-      {/* 이전 / 다음 */}
       <div className={step === "situation" ? "explore__nav explore__nav--first" : "explore__nav"}>
         {step !== "situation" && (
           <button type="button" className="explore__nav-btn" onClick={goPrev}>
