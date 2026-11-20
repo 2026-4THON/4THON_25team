@@ -10,45 +10,45 @@
 
 ## ✨ 주요 기능
 
-- 🔎 **공연 탐색** — 연극·뮤지컬 검색, 상세 정보 및 공연 일정 조회
-- 🎯 **맞춤형 추천** — 장르, 분위기, 사용자 취향에 따른 공연 추천
-- 🎟️ **관람 기록** — 관람 티켓, 출연 배우, 평점 및 리뷰 관리
-- 🤖 **AI 취향 리포트** — 관람 기록과 리뷰를 분석하여 개인별 취향 제공
-- 🔐 **소셜 로그인** — Google OAuth2 기반 로그인 및 사용자 인증
+- 🔎 **공연 탐색** — 대학로 연극·뮤지컬 검색 및 공연 상세 정보 조회
+- 🎯 **취향 기반 공연 추천** — 장르와 분위기 등 선호 조건을 반영한 공연 추천
+- 🎟️ **관람 기록 관리** — 관람 티켓 등록, 평점 및 리뷰 작성
+- 🤖 **AI 취향 리포트** — 관람 기록과 리뷰를 분석한 개인별 취향 리포트 제공
+- 🔐 **Google 소셜 로그인** — Google 계정을 통한 간편 로그인 및 사용자 인증
 
 ## 🛠️ Tech Stack
 
-| Category           | Technologies                                           |
-| ------------------ | ------------------------------------------------------ |
-| **Frontend**       | JavaScript, React 19, Vite 8, React Router 7, SCSS     |
-| **Backend**        | Java 21, Spring Boot, Spring Security, Spring Data JPA |
-| **Database**       | MySQL 8.4                                              |
-| **AI & API**       | Gemini API, KOPIS API, Kakao Maps SDK, Google OAuth2   |
-| **Infrastructure** | Google Cloud Run, Cloud SQL, Cloud Storage, Docker     |
-| **CI/CD**          | GitHub Actions                                         |
-| **Collaboration**  | Git, GitHub                                            |
+| Category | Technologies |
+|---|---|
+| **Frontend** | JavaScript, React 19, Vite 8, React Router 7, SCSS |
+| **Backend** | Java 21, Spring Boot, Spring Security, Spring Data JPA |
+| **Database** | MySQL 8.4 |
+| **AI & API** | Gemini API, KOPIS API, Kakao Maps SDK, Google OAuth2 |
+| **Infrastructure** | Google Cloud Run, Cloud SQL, Cloud Storage, Docker |
+| **CI/CD** | GitHub Actions |
+| **Collaboration** | Git, GitHub |
 
 ## 🌿 Git Convention
 
-| Branch         | Description   |
-| -------------- | ------------- |
-| `main`         | 배포 브랜치        |
-| `develop`      | 개발 통합 브랜치     |
-| `feat/#-name`  | 기능 개발         |
-| `fix/#-name`   | 버그 수정         |
+| Branch | Description |
+|---|---|
+| `main` | 배포 브랜치 |
+| `develop` | 개발 통합 브랜치 |
+| `feat/#-name` | 기능 개발 |
+| `fix/#-name` | 버그 수정 |
 | `chore/#-name` | 환경 설정 및 기타 작업 |
 
 ## 👥 Team
 
 **4THON 25 Team**
 
-| Role         | Name | University |
-| ------------ | ---- | ---------- |
-| **PM**       | 엄다영  | 서경대학교      |
-| **Frontend** | 조연우  | 성신여자대학교    |
-| **Frontend** | 김우현  | 서경대학교      |
-| **Backend**  | 유수현  | 덕성여자대학교    |
-| **Backend**  | 임종욱  | 한성대학교      |
+| Role | Name | University |
+|---|---|---|
+| **PM** | 엄다영 | 서경대학교 |
+| **Frontend** | 조연우 | 성신여자대학교 |
+| **Frontend** | 김우현 | 서경대학교 |
+| **Backend** | 유수현 | 덕성여자대학교 |
+| **Backend** | 임종욱 | 한성대학교 |
 
 ---
 
