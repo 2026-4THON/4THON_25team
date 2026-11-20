@@ -40,7 +40,7 @@ public class UserTasteEmbedding {
     @Column(nullable = false, length = 50)
     private String model;
 
-    @Column(nullable = false, columnDefinition = "BLOB")
+    @Column(name = "`vector`", nullable = false, columnDefinition = "BLOB")
     private byte[] vector;
 
     @Column(nullable = false)

@@ -5,6 +5,7 @@ import com.fourthon.backend.internal.dto.InternalResponse;
 import com.fourthon.backend.recommendation.service.RecommendationReasonService;
 import com.fourthon.backend.kopis.service.KopisSyncService;
 import com.fourthon.backend.show.service.ShowAnalysisService;
+import com.fourthon.backend.show.service.ShowVideoService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,9 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Tag(
         name = "관리용 API",
@@ -29,6 +33,7 @@ public class InternalBatchController {
     private final ShowAnalysisService showAnalysisService;
     private final ReviewAnalysisService reviewAnalysisService;
     private final RecommendationReasonService recommendationReasonService;
+    private final ShowVideoService showVideoService;
 
     @Operation(summary = "KOPIS 동기화 수동 실행")
     @PostMapping("/kopis-sync")
@@ -46,7 +51,7 @@ public class InternalBatchController {
 
     @Operation(
             summary = "공연 키워드·태그 점수 분석 수동 실행",
-            description = "아직 분석하지 않은 공연을 진행중·예정 공연부터 한 번에 최대 show-analysis.batch-size개 분석"
+            description = "KOPIS 줄거리가 없는 진행중·예정 공연의 소개 이미지에서 줄거리를 뽑은 뒤, 아직 분석하지 않은 공연을 진행중·예정 공연부터 한 번에 최대 show-analysis.batch-size개 분석"
     )
     @PostMapping("/show-analysis")
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -59,6 +64,23 @@ public class InternalBatchController {
         }
         showAnalysisService.runInBackground();
         return new InternalResponse.Started("공연 분석을 시작했습니다");
+    }
+
+    @Operation(
+            summary = "지정한 공연의 소개 이미지 줄거리 다시 추출",
+            description = "KOPIS 줄거리가 있어도 소개 이미지에서 줄거리를 뽑아 extracted_synopsis에 저장. KOPIS 줄거리가 없는 공연은 다시 분석"
+    )
+    @PostMapping("/synopsis-extraction")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public InternalResponse.Started runSynopsisExtraction(@RequestParam List<Long> performanceIds) {
+        if (showAnalysisService.isRunning()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "공연 분석이 이미 실행 중입니다"
+            );
+        }
+        showAnalysisService.extractInBackground(performanceIds);
+        return new InternalResponse.Started("소개 이미지 줄거리 추출을 시작했습니다");
     }
 
     @Operation(
@@ -93,5 +115,22 @@ public class InternalBatchController {
         }
         recommendationReasonService.runBatchInBackground();
         return new InternalResponse.Started("추천 이유 생성을 시작했습니다");
+    }
+
+    @Operation(
+            summary = "공연 유튜브 영상 검색 수동 실행",
+            description = "영상을 아직 검색하지 않은 진행중·예정 공연을 진행중 공연부터 한 번에 최대 youtube.daily-limit개 검색"
+    )
+    @PostMapping("/show-video")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public InternalResponse.Started runShowVideo() {
+        if (showVideoService.isRunning()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "공연 영상 검색이 이미 실행 중입니다"
+            );
+        }
+        showVideoService.runInBackground();
+        return new InternalResponse.Started("공연 영상 검색을 시작했습니다");
     }
 }

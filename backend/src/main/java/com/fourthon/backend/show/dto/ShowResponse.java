@@ -25,6 +25,7 @@ public final class ShowResponse {
             Rating rating,
             @Schema(description = "AI 키워드. 아직 없으면 빈 목록") List<String> keywords,
             String synopsis,
+            @Schema(description = "OFFICIAL: KOPIS 등 공식 시놉시스, EXTRACTED: 소개 이미지에서 추출한 시놉시스, NONE: 시놉시스 없음") String synopsisSource,
             LocalDate startDate,
             LocalDate endDate,
             boolean openRun,
@@ -58,6 +59,7 @@ public final class ShowResponse {
                         rating,
                         List.of(),
                         null,
+                        ShowDetail.SynopsisSource.NONE.name(),
                         null,
                         null,
                         false,
@@ -82,7 +84,8 @@ public final class ShowResponse {
                     ShowStatus.of(detail.getStartDate(), detail.getEndDate(), today).name(),
                     rating,
                     List.copyOf(detail.getKeywords()),
-                    detail.getSynopsis(),
+                    detail.displaySynopsis(),
+                    detail.synopsisSource().name(),
                     detail.getStartDate(),
                     detail.getEndDate(),
                     detail.isOpenRun(),
@@ -99,7 +102,7 @@ public final class ShowResponse {
                             .toList(),
                     cast,
                     List.copyOf(detail.getIntroImageUrls()),
-                    List.of()
+                    List.copyOf(detail.getVideoIds())
             );
         }
     }

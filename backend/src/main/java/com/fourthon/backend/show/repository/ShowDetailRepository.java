@@ -23,6 +23,15 @@ public interface ShowDetailRepository extends JpaRepository<ShowDetail, Long> {
     @Query("""
             SELECT d.performanceId
             FROM ShowDetail d
+            WHERE d.videoSearchStatus IS NULL
+              AND d.endDate >= :today
+            ORDER BY CASE WHEN d.startDate <= :today THEN 0 ELSE 1 END, d.startDate
+            """)
+    List<Long> findVideoSearchTargets(@Param("today") LocalDate today, Pageable pageable);
+
+    @Query("""
+            SELECT d.performanceId
+            FROM ShowDetail d
             WHERE d.analyzedAt IS NULL
               AND d.analysisFailCount < :maxFailCount
             ORDER BY CASE WHEN d.endDate >= :today THEN 0 ELSE 1 END, d.startDate DESC
@@ -32,4 +41,26 @@ public interface ShowDetailRepository extends JpaRepository<ShowDetail, Long> {
             @Param("maxFailCount") int maxFailCount,
             Pageable pageable
     );
+
+    @Query(value = """
+            SELECT d.performance_id
+            FROM show_details d
+            WHERE d.extracted_synopsis IS NULL
+              AND d.end_date >= :today
+              AND (d.synopsis IS NULL OR CHAR_LENGTH(TRIM(d.synopsis)) < :minSynopsisLength)
+              AND EXISTS (SELECT 1 FROM show_intro_images i WHERE i.performance_id = d.performance_id)
+            ORDER BY CASE WHEN d.start_date <= :today THEN 0 ELSE 1 END, d.start_date DESC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<Long> findExtractionTargets(
+            @Param("today") LocalDate today,
+            @Param("minSynopsisLength") int minSynopsisLength,
+            @Param("limit") int limit
+    );
+
+    @Query(
+            value = "SELECT image_url FROM show_intro_images WHERE performance_id = :performanceId ORDER BY sort_order",
+            nativeQuery = true
+    )
+    List<String> findIntroImageUrls(@Param("performanceId") Long performanceId);
 }
