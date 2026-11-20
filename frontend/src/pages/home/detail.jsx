@@ -33,7 +33,7 @@ const toView = (d) => ({
     .filter(Boolean)
     .map((k) => (k.startsWith("#") ? k : `#${k}`)),
   synopsis: d.synopsis ?? "",
-  synopsisAi: d.synopsisSource === "AI_IMAGE" || d.synopsisGenerated === true,
+  synopsisAi: d.synopsisSource === "EXTRACTED",
   period: d.startDate
     ? `${formatDot(d.startDate)} ~ ${d.openRun && !d.endDate ? "" : formatDot(d.endDate)}`.trim()
     : "",
@@ -151,9 +151,11 @@ function Detail() {
                 <>
                   {open && d.synopsisAi && (
                     <p className="detail__notice">
-                      ※ 본 시놉시스는 공식 시놉시스를 불러오지 못해,
-                      <br />
-                      제공된 이미지 자료를 바탕으로 임의로 추출 및 재구성한 내용임을 알려드립니다.
+                      <p className="detail__notice">
+                          ※ 공식 시놉시스가 제공되지 않아 <br />공연 이미지를 바탕으로
+                          
+                          AI가 정리한 내용입니다.
+                        </p>
                     </p>
                   )}
                   <p className={open ? "detail__synopsis detail__synopsis--open" : "detail__synopsis"}>
@@ -247,7 +249,7 @@ function Detail() {
             </section>
 
             <section className="detail__section detail__section--video">
-              <h2 className="detail__label">박제 영상</h2>
+              <h2 className="detail__label">참고 영상</h2>
               <div className="detail__videos">
                 {videoSlots.map((youtubeId, i) =>
                   youtubeId ? (
@@ -255,7 +257,7 @@ function Detail() {
                       key={youtubeId}
                       className="detail__video"
                       src={`https://www.youtube.com/embed/${youtubeId}`}
-                      title={`박제 영상 ${i + 1}`}
+                      title={`참고 영상 ${i + 1}`}
                       allowFullScreen
                     />
                   ) : (
