@@ -7,7 +7,6 @@ import { fetchActorReviews, likeReview, unlikeReview } from "../../api/reviews.j
 import backIcon from "../../assets/home/play.svg";
 import heartIcon from "../../assets/home/heart.svg";
 import heartFilledIcon from "../../assets/home/heart-filled.svg";
-import playIcon from "../../assets/home/chevron.svg";
 
 const SORTS = [
   { key: "latest", label: "최신순" },
@@ -83,14 +82,7 @@ function ActorReview() {
         >
           <img src={backIcon} alt="" />
         </button>
-        <button
-          type="button"
-          className="actor-review__explore"
-          onClick={() => navigate("/explore")}
-        >
-          내 상황에 맞춘 공연 탐색
-          <img src={playIcon} alt="" />
-        </button>
+        <h1 className="actor-review__title">배우 후기</h1>
       </header>
 
       <section className="actor-review__top">

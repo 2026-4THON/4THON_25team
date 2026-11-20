@@ -36,40 +36,17 @@ $date: rgba(72, 75, 86, 0.4);
     }
   }
 
-  &__explore {
+  &__title {
     position: absolute;
-    top: 59px;
+    top: 69px;
     left: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    box-sizing: border-box;
-    width: 292px;
-    height: 38px;
-    padding: 0 28px 0 0;
+    margin: 0;
     transform: translateX(-50%);
-    border: 1.5px solid #fac269;
-    border-radius: 100px;
-    background: #fff;
-    font-family: inherit;
-    font-size: 14px;
+    font-size: 22px;
     font-weight: 500;
-    line-height: normal;
-    color: #4d4d4d;
+    line-height: 26px;
+    color: #0078d4;
     white-space: nowrap;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-
-    img {
-      position: absolute;
-      top: 50%;
-      right: 21px;
-      display: block;
-      width: 9px;
-      height: 11px;
-      transform: translateY(-50%);
-    }
   }
 
   &__top {
