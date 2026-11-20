@@ -62,7 +62,7 @@ export const toDetail = (t) => {
     cast,
     expenses: [
       { label: "티켓", amount: won(t.ticketPrice) },
-      { label: "청년 문화 예술 패스", amount: won(t.culturePassAmount) },
+      {label: "청년 문화 예술 패스",amount: Number(t.culturePassAmount) > 0 ? `-${won(t.culturePassAmount)}` : won(t.culturePassAmount),},
       { label: "MD", amount: won(t.mdPrice) },
     ],
     total: won(t.totalExpense),

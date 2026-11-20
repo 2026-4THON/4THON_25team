@@ -2,7 +2,7 @@ $blue: #0078d4;
 $gray: #919191;
 $light-gray: #aeaeae;
 $chip-bg: #edf4fb;
-$line: #cfe3f5; // 구분선 색 (시안의 선 에셋 색과 다르면 여기만 수정)
+$line: #cfe3f5; 
 
 .detail {
   min-height: 100%;
@@ -353,7 +353,7 @@ $line: #cfe3f5; // 구분선 색 (시안의 선 에셋 색과 다르면 여기�
     -webkit-tap-highlight-color: transparent;
   }
 
-  // 박제 영상
+  // 참고 영상
   &__videos {
     display: flex;
     gap: 10px;

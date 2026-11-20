@@ -14,6 +14,9 @@ export default defineConfig(({ mode }) => {
     cookieDomainRewrite: 'localhost',
     configure: (p) => {
       p.on('proxyReq', (req) => {
+        // POST/PUT/DELETE 는 브라우저가 Origin(localhost:5173)을 붙여서 서버 CORS 검사에 막힘 → 서버 주소로 교체
+        if (req.getHeader('origin')) req.setHeader('origin', target)
+
         if (!env.VITE_DEV_COOKIE) return
         // 브라우저 쿠키(XSRF-TOKEN 등)는 유지하고 JSESSIONID 만 개발용 값으로 교체
         const rest = (req.getHeader('cookie') || '')

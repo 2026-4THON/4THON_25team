@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import "./my.scss";
 import { fetchMySummary } from "../../api/my.js";
-import { logout } from "../../api/logout.js";
+import { logout } from "../../auth.js";
 
 // 서버 응답(/api/my/summary) -> 화면용
 const toView = (d) => ({

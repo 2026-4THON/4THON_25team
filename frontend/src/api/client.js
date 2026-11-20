@@ -1,14 +1,21 @@
 // 공통 fetch 클라이언트: 쿠키 포함 + CSRF 토큰 자동 첨부
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
-let csrf = null; // { headerName, token }
+const readCookie = (name) => {
+  const hit = document.cookie.split("; ").find((c) => c.startsWith(`${name}=`));
+  return hit ? decodeURIComponent(hit.slice(name.length + 1)) : null;
+};
 
+// 서버는 XSRF-TOKEN 쿠키 값을 X-XSRF-TOKEN 헤더로 받는다 (쿠키가 없으면 /auth/csrf 로 받아옴)
 export async function loadCsrf(force = false) {
-  if (csrf && !force) return csrf;
-  const res = await fetch(`${BASE_URL}/auth/csrf`, { credentials: "include" });
-  if (!res.ok) throw new Error(`CSRF 조회 실패 (${res.status})`);
-  csrf = await res.json();
-  return csrf;
+  let token = readCookie("XSRF-TOKEN");
+  if (!token || force) {
+    const res = await fetch(`${BASE_URL}/auth/csrf`, { credentials: "include" });
+    if (!res.ok) throw new Error(`CSRF 조회 실패 (${res.status})`);
+    const body = await res.json();
+    token = readCookie("XSRF-TOKEN") ?? body.token;
+  }
+  return { headerName: "X-XSRF-TOKEN", token };
 }
 
 export class ApiError extends Error {
