@@ -1,140 +1,161 @@
 $blue: #509cd8;
 $sky: #b0d3f5;
 
+@function x($left) {
+  @return calc(50% - 195px + #{$left});
+}
+
 .start {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-  padding: 120px 0 100px; // 위/아래 흰 띠가 차지하는 높이
-  overflow: hidden;
-  background: linear-gradient(to top, $sky, $blue 88.942%);
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   font-family: "Paperlogy", sans-serif;
 
-  // ---------- 위/아래 흰 띠 (티켓 절취선 모양 반원) ----------
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &__page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    overflow: hidden;
+    background: linear-gradient(to top, $sky, $blue 88.942%);
+  }
+
   &__band {
-    position: absolute;
-    left: 0;
-    right: 0;
+    position: relative;
+    flex: none;
+    z-index: 1;
     background: #fff;
 
-    // 22px 원이 30px 간격으로 7개
-    &::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      width: 334px;
-      height: 11px;
-      transform: translateX(-50%);
-    }
-
     &--top {
-      top: 0;
       height: 89px;
-
-      &::after {
-        top: 100%;
-        background: radial-gradient(circle at 11px 0, #fff 11px, transparent 11.5px) 0 0 / 52px
-          11px repeat-x;
-      }
     }
 
     &--bottom {
-      bottom: 0;
       height: 65px;
-
-      &::after {
-        bottom: 100%;
-        background: radial-gradient(circle at 11px 11px, #fff 11px, transparent 11.5px) 0 0 /
-          52px 11px repeat-x;
-      }
     }
   }
 
+  &__dots {
+    position: absolute;
+    left: 50%;
+    display: flex;
+    gap: 30px;
+    transform: translateX(-50%);
 
-  &__stage {
+    &--top {
+      top: 78px;
+    }
+
+    &--bottom {
+      top: -11px;
+    }
+  }
+
+  &__dot {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  &__body {
     display: flex;
     flex: 1;
     flex-direction: column;
-    min-height: 496px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 39px 0;
   }
 
-  &__gap {
-    position: relative;
-
-    &--top {
-      flex: 130 1 0;
-    }
-
-    &--bottom {
-      flex: 64 1 0;
-    }
-  }
-
-  &__line {
-    position: absolute;
-    left: 50%;
+  &__rule {
+    flex: none;
     width: 338px;
-    height: 0;
-    border-top: 2px solid rgba(255, 255, 255, 0.7);
-    transform: translateX(-50%);
+    height: 2px;
+    background: #fff;
 
     &--top {
-      top: 20px;
+      opacity: 0.36;
     }
 
     &--bottom {
-      top: 0px; 
+      opacity: 0.47;
     }
   }
 
-  &__content {
+  &__hero {
     position: relative;
     flex: none;
     width: 100%;
-    height: 680px;
+    height: 608px;
   }
 
-  // ---------- 로고 ----------
   &__ring {
     position: absolute;
-    top: 90px;
-    left: 50%;
+    top: 89px;
+    left: x(46px);
     width: 302px;
     height: 302px;
-    border: 1px solid #fff;
     border-radius: 50%;
-    transform: translateX(-50%);
     background: radial-gradient(
       circle 194.5px at 50% 0,
-      rgba(255, 255, 255, 0.4) 2.3%,
-      rgba(255, 255, 255, 0.125) 46.5%,
+      rgba(255, 255, 255, 0.784) 2.31%,
+      rgba(255, 255, 255, 0.758) 6%,
+      rgba(255, 255, 255, 0.728) 10%,
+      rgba(255, 255, 255, 0.687) 15%,
+      rgba(255, 255, 255, 0.642) 20%,
+      rgba(255, 255, 255, 0.593) 25%,
+      rgba(255, 255, 255, 0.539) 30%,
+      rgba(255, 255, 255, 0.481) 35%,
+      rgba(255, 255, 255, 0.419) 40%,
+      rgba(255, 255, 255, 0.33) 46.5%,
+      rgba(255, 255, 255, 0.283) 55%,
+      rgba(255, 255, 255, 0.226) 65%,
+      rgba(255, 255, 255, 0.165) 75%,
+      rgba(255, 255, 255, 0.101) 85%,
       rgba(255, 255, 255, 0) 100%
     );
+    background-origin: border-box;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      padding: 1px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
   }
 
-  // 안쪽 반투명 원
   &__halo {
     position: absolute;
-    top: 169px;
-    left: 50%;
+    top: 168px;
+    left: x(125px);
     width: 144px;
     height: 144px;
     border-radius: 50%;
-    transform: translateX(-50%);
     background: rgba(183, 212, 237, 0.2);
   }
 
-  // 흰 원 + 로고
   &__logo {
     position: absolute;
-    top: 181px;
-    left: 50%;
+    top: 180px;
+    left: x(137px);
     width: 120px;
     height: 120px;
     overflow: hidden;
     border-radius: 50%;
-    transform: translateX(-50%);
     background: #fff;
     box-shadow: 0 4px 4px rgba(80, 156, 216, 0.2);
 
@@ -142,40 +163,39 @@ $sky: #b0d3f5;
       position: absolute;
       top: 30px;
       left: 14px;
-      width: 91px;
-      height: auto;
+      width: 91.0545px;
+      height: 60.2694px;
     }
   }
 
-  // ---------- 문구 ----------
   &__copy {
     position: absolute;
-    top: 335px;
-    left: 50%;
+    top: 334px;
+    left: x(94px);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
     width: 202px;
-    transform: translateX(-50%);
     text-align: center;
   }
 
   &__tagline {
     margin: 0;
+    padding-left: 4px;
     font-size: 14px;
     font-weight: 500;
-    line-height: normal;
+    line-height: 16px;
     letter-spacing: 0.7px;
     color: #d9eeff;
-    white-space: nowrap;
+    white-space: pre;
   }
 
   &__desc {
     margin: 0;
     font-size: 20px;
     font-weight: 500;
-    line-height: normal;
+    line-height: 24px;
     letter-spacing: 1px;
     color: #ebf6ff;
     white-space: nowrap;
@@ -184,9 +204,8 @@ $sky: #b0d3f5;
   &__title {
     position: absolute;
     top: 420px;
-    left: 50%;
+    left: x(141px);
     margin: 0;
-    transform: translateX(-50%);
     font-size: 40px;
     font-weight: 500;
     line-height: 30px;
@@ -196,53 +215,69 @@ $sky: #b0d3f5;
     white-space: nowrap;
   }
 
-    &__ornament {
-        display: flex;
-        align-items: center;
-        position: absolute;
-        position: absolute;
-        left: 50%;
-        width: 329.5px;                 
-        height: 24.5px;
-        transform: translateX(-50%);   
-        display: flex;
-        align-items: center;
-        top: 500px;
-        }
+  &__ornament {
+    position: absolute;
+    top: 502px;
+    left: x(27px);
+    width: 329.5px;
+    height: 24.5px;
+  }
 
-        &__ornament-line {
-        flex: 1;
-        height: 2px;
+  &__ornament-line {
+    position: absolute;
+    top: 11.75px;
+    width: 142px;
+    height: 1px;
 
-        &--left {
-            background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9));
-        }
+    &--left {
+      left: 0;
+      background: linear-gradient(to right, rgba(255, 255, 255, 0), #fff);
+    }
 
-        &--right {
-            background: linear-gradient(to right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
-        }
-        }
+    &--right {
+      left: 187.5px;
+      background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
+    }
+  }
 
-&__ornament-center {
-  display: block;
-  flex: none;
-  height: 24.5px;
-  width: auto;
-}
+  &__ornament-diamond {
+    position: absolute;
+    top: 8.75px;
+    width: 7px;
+    height: 7px;
+    background: #fff;
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+
+    &--left {
+      left: 138.5px;
+    }
+
+    &--right {
+      left: 183.75px;
+    }
+  }
+
+  &__ornament-star {
+    position: absolute;
+    top: 0;
+    left: 152px;
+    display: block;
+    width: 25.5px;
+    height: 24.5px;
+  }
 
   &__google {
     position: absolute;
-    top: 545px;
-    left: 50%;
+    top: 544px;
+    left: x(102px);
     display: flex;
     align-items: center;
     justify-content: center;
     width: 180px;
     height: 41px;
-    padding: 0;
-    border: 0;
+    padding: 4px 0 5px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 100px;
-    transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.2);
     font-family: inherit;
     font-size: 18px;
@@ -250,6 +285,7 @@ $sky: #b0d3f5;
     line-height: 30px;
     letter-spacing: 0.9px;
     color: #4d4d4d;
+    white-space: nowrap;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
